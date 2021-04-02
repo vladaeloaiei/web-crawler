@@ -13,7 +13,7 @@ public class RobotsTxtParser {
     private static final Logger LOGGER = LogManager.getLogger(RobotsTxtParser.class);
 
     public RobotsPolicy parse(RawWebResource robotsTxt, String userAgent) {
-        LOGGER.debug("Parsing robots.txt for domain: " + robotsTxt.getUrl().getDomain() + " location: " + robotsTxt.getUrl().getLocation());
+        LOGGER.debug("Parsing robots.txt location: " + robotsTxt.getLocation());
         RobotsPolicy globalPolicy = null;
         RobotsPolicy identityPolicy = null;
 

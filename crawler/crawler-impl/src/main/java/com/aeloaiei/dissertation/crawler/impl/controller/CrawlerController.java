@@ -2,7 +2,7 @@ package com.aeloaiei.dissertation.crawler.impl.controller;
 
 import com.aeloaiei.dissertation.crawler.api.dto.DomainDto;
 import com.aeloaiei.dissertation.crawler.impl.model.nosql.Domain;
-import com.aeloaiei.dissertation.crawler.impl.service.nosql.DomainService;
+import com.aeloaiei.dissertation.crawler.impl.service.nosql.CrawlerService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +19,15 @@ import static java.util.stream.Collectors.toList;
 
 @RequestMapping("/crawler")
 @RestController
-public class CrawlController {
+public class CrawlerController {
     @Autowired
-    private DomainService domainService;
+    private CrawlerService crawlerService;
     @Autowired
     private ModelMapper modelMapper;
 
     @GetMapping
     public ResponseEntity<DomainDto> getCrawlableDomains() {
-        return domainService.getCrawlableDomain()
+        return crawlerService.getCrawlableDomain()
                 .map(d -> modelMapper.map(d, DomainDto.class))
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -39,7 +39,7 @@ public class CrawlController {
                 .stream()
                 .map(domainDto -> modelMapper.map(domainDto, Domain.class))
                 .collect(toList());
-        List<DomainDto> savedDomainDtos = domainService.putAllExplored(domains)
+        List<DomainDto> savedDomainDtos = crawlerService.putAllExplored(domains)
                 .stream()
                 .map(domain -> modelMapper.map(domain, DomainDto.class))
                 .collect(toList());
@@ -53,7 +53,7 @@ public class CrawlController {
                 .stream()
                 .map(domainDto -> modelMapper.map(domainDto, Domain.class))
                 .collect(toList());
-        List<DomainDto> savedDomainDtos = domainService.putAllNew(domains)
+        List<DomainDto> savedDomainDtos = crawlerService.putAllNew(domains)
                 .stream()
                 .map(domain -> modelMapper.map(domain, DomainDto.class))
                 .collect(toList());

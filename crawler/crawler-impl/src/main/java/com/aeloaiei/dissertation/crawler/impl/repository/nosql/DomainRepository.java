@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface DomainRepository extends MongoRepository<Domain, String> {
     Optional<Domain> findTopByOrderByLastCrawledAsc();
 
-    Optional<Domain> findByName(String name);
+    boolean existsByName(String name);
 }

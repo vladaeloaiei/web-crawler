@@ -6,15 +6,14 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface UniformResourceLocatorRepository extends MongoRepository<UniformResourceLocator, String> {
     List<UniformResourceLocator> findAllByDomain(String domain, Pageable pageable);
 
-    List<UniformResourceLocator> findByDomainOrderByPathDesc(String domain);
+    List<UniformResourceLocator> findByDomainOrderByPathDesc(String domain, Pageable pageable);
 
-    Optional<UniformResourceLocator> findByLocation(String location);
+    boolean existsByLocation(String location);
 
     int countByDomain(String domain);
 }

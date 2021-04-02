@@ -15,9 +15,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static java.util.Collections.singletonList;
 
 @EnableFeignClients(basePackages = "com.aeloaiei.dissertation.crawler.api")
 @EnableMongoRepositories(basePackages = "com.aeloaiei.dissertation.domainexplorer.repository.nosql")
@@ -45,6 +46,6 @@ public class DomainExplorerApplication implements CommandLineRunner {
 
     @PostConstruct
     public void addURL() throws Exception {
-        uniformResourceLocatorService.put(new UniformResourceLocator("https://www.baeldung.com/java-initialize-hashmap"));
+        uniformResourceLocatorService.putAllNew(singletonList(new UniformResourceLocator("https://www.baeldung.com/java-initialize-hashmap")));
     }
 }

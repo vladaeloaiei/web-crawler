@@ -8,13 +8,15 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.LocalDateTime.now;
+
 @Service
-public class DomainService {
-    private static final Logger LOGGER = LogManager.getLogger(DomainService.class);
+public class CrawlerService {
+    private static final Logger LOGGER = LogManager.getLogger(CrawlerService.class);
+    private static final int MINIM_SECONDS_FROM_LAST_CRAWL = 30;
 
     @Autowired
     private DomainRepository domainRepository;
@@ -27,14 +29,23 @@ public class DomainService {
         if (domain.isPresent()) {
             Domain currentDomain = domain.get();
 
-            currentDomain.setLastCrawled(LocalDateTime.now());
-            LOGGER.info("Sending domain for crawl: " + domain);
-            return Optional.of(domainRepository.save(currentDomain));
+            if (isValidForCrawling(currentDomain)) {
+                currentDomain.setLastCrawled(now());
+
+                LOGGER.info("Sending domain for crawl: " + domain);
+                return Optional.of(domainRepository.save(currentDomain));
+            } else {
+                LOGGER.warn("No domain available for crawling found");
+            }
         } else {
             LOGGER.warn("No domain found");
-            return Optional.empty();
         }
 
+        return Optional.empty();
+    }
+
+    private boolean isValidForCrawling(Domain domain) {
+        return domain.getLastCrawled().isBefore(now().minusSeconds(MINIM_SECONDS_FROM_LAST_CRAWL));
     }
 
     public List<Domain> putAllExplored(List<Domain> domains) {
@@ -43,21 +54,11 @@ public class DomainService {
 
     public List<Domain> putAllNew(List<Domain> domains) {
         for (Domain domain : domains) {
-            put(domain);
+            if (!domainRepository.existsByName(domain.getName())) {
+                domainRepository.save(domain);
+            }
         }
 
-        return domainRepository.saveAll(domains);
-    }
-
-    private void put(Domain domain) {
-        domainRepository.findByName(domain.getName())
-                .ifPresent(currentDomain ->
-                        domain.setLastCrawled(getNewest(domain.getLastCrawled(), currentDomain.getLastCrawled())));
-
-        domainRepository.save(domain);
-    }
-
-    private LocalDateTime getNewest(LocalDateTime a, LocalDateTime b) {
-        return a.isAfter(b) ? a : b;
+        return domains;
     }
 }

@@ -1,7 +1,7 @@
 package com.aeloaiei.dissertation.crawler;
 
 import com.aeloaiei.dissertation.crawler.impl.model.nosql.Domain;
-import com.aeloaiei.dissertation.crawler.impl.service.nosql.DomainService;
+import com.aeloaiei.dissertation.crawler.impl.service.nosql.CrawlerService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -9,15 +9,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
 
+import static java.time.LocalDateTime.now;
 import static java.util.Collections.singletonList;
 
 @SpringBootApplication
 public class CrawlerApplication {
 
     @Autowired
-    private DomainService domainService;
+    private CrawlerService crawlerService;
 
     public static void main(String[] args) {
         SpringApplication.run(CrawlerApplication.class, args);
@@ -30,6 +30,6 @@ public class CrawlerApplication {
 
     @PostConstruct
     public void addDomain() {
-        domainService.putAllNew(singletonList(new Domain("https://www.baeldung.com", LocalDateTime.now())));
+        crawlerService.putAllNew(singletonList(new Domain("https://www.baeldung.com", now())));
     }
 }

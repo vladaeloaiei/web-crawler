@@ -4,6 +4,7 @@ services:
 
   data-lake:
     image: mongo
+    container_name: data-lake
     restart: always
     ports:
       - '27017:27017'
@@ -11,5 +12,17 @@ services:
       MONGO_INITDB_ROOT_USERNAME: 'root'
       MONGO_INITDB_ROOT_PASSWORD: 'password'
       MONGO_INITDB_DATABASE: 'data-lake'
+    networks:
+      crawler-network:
+        ipv4_address: 10.5.0.2
     volumes:
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+networks:
+  crawler-network:
+    driver: bridge
+    name: crawler-network
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.5.0.0/16

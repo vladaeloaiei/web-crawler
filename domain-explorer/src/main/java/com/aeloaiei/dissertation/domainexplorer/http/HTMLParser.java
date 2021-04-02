@@ -8,10 +8,12 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Component
@@ -22,32 +24,38 @@ public class HTMLParser {
     private static final String ROBOTS_NO_INDEX = "noindex";
     private static final String ROBOTS_NONE = "none";
 
-    public WebDocument parse(RawWebResource rawWebResource) {
-        Document doc = Jsoup.parse(rawWebResource.getContent(), rawWebResource.getUrl().getLocation());
+    public Pair<WebDocument, UniformResourceLocator> parse(RawWebResource rawWebResource, UniformResourceLocator url) {
+        Document doc = Jsoup.parse(rawWebResource.getContent(), rawWebResource.getLocation());
         Elements metaElements = doc.getElementsByTag("meta");
         Elements linkElements = doc.getElementsByTag("a");
+        WebDocument webDocument;
         Set<String> links = new HashSet<>();
         Set<String> domains = new HashSet<>();
+
         String content = "";
 
         switch (getPolicy(metaElements)) {
             case ROBOTS_ALLOWED:
                 content = getContent(doc);
-                links = getLinks(linkElements);
+                links = getLinks(rawWebResource.getLocation(), linkElements);
                 domains = getDomains(links);
                 break;
             case ROBOTS_NO_FOLLOW:
                 content = getContent(doc);
                 break;
             case ROBOTS_NO_INDEX:
-                links = getLinks(linkElements);
+                links = getLinks(rawWebResource.getLocation(), linkElements);
                 domains = getDomains(links);
                 break;
             default: //ROBOTS_NONE
                 break;
         }
 
-        return new WebDocument(rawWebResource.getUrl().getLocation(), content, rawWebResource.getStatus().value(), links, domains);
+        url.getLinksReferred().addAll(links);
+        url.getDomainsReferred().addAll(domains);
+        webDocument = new WebDocument(rawWebResource.getLocation(), content, rawWebResource.getStatus().value());
+
+        return Pair.of(webDocument, url);
     }
 
     private String getPolicy(Elements metaElements) {
@@ -74,7 +82,7 @@ public class HTMLParser {
         return document.text();
     }
 
-    private Set<String> getLinks(Elements linkElements) {
+    private Set<String> getLinks(String sourceLink, Elements linkElements) {
         Set<String> links = new HashSet<>();
         String link;
 
@@ -87,7 +95,7 @@ public class HTMLParser {
                     link = linkElement.attr("abs:href");
                 }
 
-                if (isValidURL(link)) {
+                if (isValidURL(sourceLink, link)) {
                     links.add(link);
                 }
             }
@@ -96,10 +104,14 @@ public class HTMLParser {
         return links;
     }
 
-    private boolean isValidURL(String link) {
+    private boolean isValidURL(String sourceLink, String link) {
         try {
-            new URL(link);
-            return true;
+            if (Objects.equals(sourceLink, link)) {
+                return false;
+            } else {
+                new URL(link);
+                return true;
+            }
         } catch (Exception e) {
             return false;
         }

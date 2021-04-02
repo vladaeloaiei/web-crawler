@@ -29,11 +29,12 @@ import static com.aeloaiei.dissertation.domainexplorer.utils.Configuration.PERCE
 import static com.aeloaiei.dissertation.domainexplorer.utils.Configuration.RESOURCE_REQUEST_DELAY_IN_MILLISECONDS;
 import static com.aeloaiei.dissertation.domainexplorer.utils.Configuration.USER_AGENT;
 import static java.lang.Math.ceil;
+import static java.time.LocalDateTime.now;
 
 @Service
 public class SingleDomainExplorerDaemon implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger(SingleDomainExplorerDaemon.class);
-    private static final LocalDateTime ONE_HUNDRED_YEARS_AGO = LocalDateTime.now().minusYears(100);
+    private static final LocalDateTime ONE_HUNDRED_YEARS_AGO = now().minusYears(100);
 
     @Autowired
     private UniformResourceLocatorService urlService;
@@ -75,15 +76,20 @@ public class SingleDomainExplorerDaemon implements Runnable {
             }
 
         } catch (RuntimeException e) {
-            LOGGER.error("Failed to explore.. Trying again..", e);
+            LOGGER.error("Exploring finished with error.. Retrying..", e);
         }
     }
 
     private Pair<DomainDto, RobotsPolicy> getDomainToCrawl() {
-        DomainDto domainDto = crawlClient.getCrawlableDomain();
-        RobotsPolicy robotsPolicy = getRobotsPolicy(domainDto);
+        try {
 
-        return Pair.of(domainDto, robotsPolicy);
+            DomainDto domainDto = crawlClient.getCrawlableDomain();
+            RobotsPolicy robotsPolicy = getRobotsPolicy(domainDto);
+
+            return Pair.of(domainDto, robotsPolicy);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Failed to retrieve domain for crawling", e);
+        }
     }
 
     private RobotsPolicy getRobotsPolicy(DomainDto domain) {
@@ -99,7 +105,6 @@ public class SingleDomainExplorerDaemon implements Runnable {
             } else {
                 robotsPolicy = robotsTxtWebResource.map(x -> robotsTxtParser.parse(x, USER_AGENT)).get();
             }
-
         } catch (MalformedURLException e) {
             LOGGER.warn("Malformed robots.txt URL : " + robotsTxtLocation);
         }
@@ -128,25 +133,27 @@ public class SingleDomainExplorerDaemon implements Runnable {
                 LOGGER.debug("Not allowed to explore: " + url.getLocation());
             } else {
                 LOGGER.debug("Exploring: " + url.getLocation());
-                exploreUrl(url);
+                exploreUrl(url, domain);
             }
-
-            updateCrawledDomain(domain);
-            updateCrawledURL(url);
         }
     }
 
-    private void exploreUrl(UniformResourceLocator url) {
+    private void exploreUrl(UniformResourceLocator url, DomainDto domain) {
         Optional<RawWebResource> rawWebResource = httpResourceRetriever.retrieve(url, USER_AGENT);
 
         if (!rawWebResource.isPresent()) {
             LOGGER.error("Failed to explore: " + url);
         } else {
-            WebDocument webDocument = htmlParser.parse(rawWebResource.get());
+            Pair<WebDocument, UniformResourceLocator> urlDocument = htmlParser.parse(rawWebResource.get(), url);
+            WebDocument exploredWebDocument = urlDocument.getFirst();
+            UniformResourceLocator exploredUrl = urlDocument.getSecond();
 
-            putDiscoveredDomains(webDocument.getDomainsReferred());
-            putDiscoveredURLs(webDocument.getLinksReferred());
-            storageDaemon.putExploredDocument(webDocument);
+            putDiscoveredDomains(exploredUrl.getDomainsReferred());
+            putDiscoveredURLs(exploredUrl.getLinksReferred());
+            storageDaemon.putExploredDocument(exploredWebDocument);
+
+            updateCrawledDomain(domain);
+            updateCrawledURL(exploredUrl);
         }
     }
 
@@ -198,12 +205,12 @@ public class SingleDomainExplorerDaemon implements Runnable {
     }
 
     private void updateCrawledDomain(DomainDto domain) {
-        domain.setLastCrawled(LocalDateTime.now());
+        domain.setLastCrawled(now());
         storageDaemon.putExploredDomain(domain);
     }
 
     private void updateCrawledURL(UniformResourceLocator url) {
-        url.setLastCrawled(LocalDateTime.now());
+        url.setLastCrawled(now());
         storageDaemon.putExploredURL(url);
     }
 }

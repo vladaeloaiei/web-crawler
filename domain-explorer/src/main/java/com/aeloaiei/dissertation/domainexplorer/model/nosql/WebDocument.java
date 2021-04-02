@@ -7,8 +7,6 @@ import org.springframework.data.mongodb.core.index.HashIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.util.Set;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,6 +17,4 @@ public class WebDocument {
     private String content;
     @HashIndexed
     private int httpStatus;
-    private Set<String> linksReferred;
-    private Set<String> domainsReferred;
 }
