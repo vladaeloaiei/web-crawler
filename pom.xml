@@ -12,7 +12,7 @@
     </parent>
 
     <modules>
-        <module>crawler</module>
+        <module>domain-feeder</module>
         <module>domain-explorer</module>
     </modules>
 

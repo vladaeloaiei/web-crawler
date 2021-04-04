@@ -1,6 +1,6 @@
 package com.aeloaiei.dissertation.domainexplorer.service.daemon;
 
-import com.aeloaiei.dissertation.crawler.api.clients.CrawlClient;
+import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.ExecutorService;
@@ -11,7 +11,7 @@ import static com.aeloaiei.dissertation.domainexplorer.utils.Configuration.CONCU
 public class MultiDomainExplorerDaemon implements Runnable {
 
     @Autowired
-    private CrawlClient crawlClient;
+    private DomainFeederClient domainFeederClient;
 
     private ExecutorService executor = Executors.newFixedThreadPool(CONCURRENT_DOMAINS_EXPLORER_COUNT);
 

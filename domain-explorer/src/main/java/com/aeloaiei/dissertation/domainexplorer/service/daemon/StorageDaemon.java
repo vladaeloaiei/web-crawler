@@ -1,11 +1,11 @@
 package com.aeloaiei.dissertation.domainexplorer.service.daemon;
 
-import com.aeloaiei.dissertation.crawler.api.clients.CrawlClient;
-import com.aeloaiei.dissertation.crawler.api.dto.DomainDto;
 import com.aeloaiei.dissertation.domainexplorer.model.nosql.UniformResourceLocator;
 import com.aeloaiei.dissertation.domainexplorer.model.nosql.WebDocument;
 import com.aeloaiei.dissertation.domainexplorer.service.nosql.UniformResourceLocatorService;
 import com.aeloaiei.dissertation.domainexplorer.service.nosql.WebDocumentService;
+import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
+import com.aeloaiei.dissertation.domainfeeder.api.dto.DomainDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class StorageDaemon implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger(StorageDaemon.class);
 
     @Autowired
-    private CrawlClient crawlClient;
+    private DomainFeederClient domainFeederClient;
     @Autowired
     private UniformResourceLocatorService urlService;
     @Autowired
@@ -83,13 +83,13 @@ public class StorageDaemon implements Runnable {
         if (!discoveredDomains.isEmpty()) {
             discoveredDomains = new ConcurrentHashMap<>();
             LOGGER.debug("Publishing discovered domains: " + tempDiscoveredDomains.values().toString());
-            crawlClient.putNewDomains(tempDiscoveredDomains.values());
+            domainFeederClient.putNewDomains(tempDiscoveredDomains.values());
         }
 
         if (!exploredDomains.isEmpty()) {
             exploredDomains = new ConcurrentHashMap<>();
             LOGGER.debug("Publishing explored domains: " + tempExploredDomains.values().toString());
-            crawlClient.putExploredDomains(tempExploredDomains.values());
+            domainFeederClient.putExploredDomains(tempExploredDomains.values());
         }
     }
 

@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 
 import static java.util.Collections.singletonList;
 
-@EnableFeignClients(basePackages = "com.aeloaiei.dissertation.crawler.api")
+@EnableFeignClients(basePackages = "com.aeloaiei.dissertation.domainfeeder.api")
 @EnableMongoRepositories(basePackages = "com.aeloaiei.dissertation.domainexplorer.repository.nosql")
 @SpringBootApplication
 public class DomainExplorerApplication implements CommandLineRunner {

@@ -1,7 +1,5 @@
 package com.aeloaiei.dissertation.domainexplorer.service.daemon;
 
-import com.aeloaiei.dissertation.crawler.api.clients.CrawlClient;
-import com.aeloaiei.dissertation.crawler.api.dto.DomainDto;
 import com.aeloaiei.dissertation.domainexplorer.http.HTMLParser;
 import com.aeloaiei.dissertation.domainexplorer.http.HTTPResourceRetriever;
 import com.aeloaiei.dissertation.domainexplorer.http.RawWebResource;
@@ -11,6 +9,8 @@ import com.aeloaiei.dissertation.domainexplorer.model.nosql.UniformResourceLocat
 import com.aeloaiei.dissertation.domainexplorer.model.nosql.WebDocument;
 import com.aeloaiei.dissertation.domainexplorer.service.nosql.UniformResourceLocatorService;
 import com.aeloaiei.dissertation.domainexplorer.service.nosql.WebDocumentService;
+import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
+import com.aeloaiei.dissertation.domainfeeder.api.dto.DomainDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
     @Autowired
     private StorageDaemon storageDaemon;
     @Autowired
-    private CrawlClient crawlClient;
+    private DomainFeederClient domainFeederClient;
     @Autowired
     private HTTPResourceRetriever httpResourceRetriever;
     @Autowired
@@ -83,7 +83,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
     private Pair<DomainDto, RobotsPolicy> getDomainToCrawl() {
         try {
 
-            DomainDto domainDto = crawlClient.getCrawlableDomain();
+            DomainDto domainDto = domainFeederClient.getCrawlableDomain();
             RobotsPolicy robotsPolicy = getRobotsPolicy(domainDto);
 
             return Pair.of(domainDto, robotsPolicy);
