@@ -5,12 +5,12 @@ import com.aeloaiei.dissertation.domainexplorer.http.HTTPResourceRetriever;
 import com.aeloaiei.dissertation.domainexplorer.http.RawWebResource;
 import com.aeloaiei.dissertation.domainexplorer.http.RobotsPolicy;
 import com.aeloaiei.dissertation.domainexplorer.http.RobotsTxtParser;
-import com.aeloaiei.dissertation.domainexplorer.model.nosql.UniformResourceLocator;
 import com.aeloaiei.dissertation.domainexplorer.model.nosql.WebDocument;
-import com.aeloaiei.dissertation.domainexplorer.service.nosql.UniformResourceLocatorService;
 import com.aeloaiei.dissertation.domainexplorer.service.nosql.WebDocumentService;
 import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
 import com.aeloaiei.dissertation.domainfeeder.api.dto.DomainDto;
+import com.aeloaiei.dissertation.urlfrontier.api.clients.UrlFrontierClient;
+import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +19,14 @@ import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.aeloaiei.dissertation.domainexplorer.utils.Configuration.PERCENTAGE_OF_RESOURCES_TO_CRAWL;
 import static com.aeloaiei.dissertation.domainexplorer.utils.Configuration.RESOURCE_REQUEST_DELAY_IN_MILLISECONDS;
 import static com.aeloaiei.dissertation.domainexplorer.utils.Configuration.USER_AGENT;
-import static java.lang.Math.ceil;
 import static java.time.LocalDateTime.now;
 
 @Service
@@ -37,13 +35,13 @@ public class SingleDomainExplorerDaemon implements Runnable {
     private static final LocalDateTime ONE_HUNDRED_YEARS_AGO = now().minusYears(100);
 
     @Autowired
-    private UniformResourceLocatorService urlService;
+    private DomainFeederClient domainFeederClient;
+    @Autowired
+    private UrlFrontierClient urlFrontierClient;
     @Autowired
     private WebDocumentService webDocumentService;
     @Autowired
     private StorageDaemon storageDaemon;
-    @Autowired
-    private DomainFeederClient domainFeederClient;
     @Autowired
     private HTTPResourceRetriever httpResourceRetriever;
     @Autowired
@@ -66,7 +64,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
         try {
             Thread.sleep(RESOURCE_REQUEST_DELAY_IN_MILLISECONDS);
             Pair<DomainDto, RobotsPolicy> domainAndPolicy = getDomainToCrawl();
-            List<UniformResourceLocator> urls = getExplorableURLs(domainAndPolicy.getFirst());
+            Collection<UniformResourceLocatorDto> urls = urlFrontierClient.getExplorableURLs(domainAndPolicy.getFirst().getName());
 
             if (urls.isEmpty()) {
                 LOGGER.warn("No url found for domain: " + domainAndPolicy.getFirst().getName());
@@ -97,7 +95,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
         RobotsPolicy robotsPolicy = new RobotsPolicy(USER_AGENT);
 
         try {
-            UniformResourceLocator robotsTxtURL = new UniformResourceLocator(robotsTxtLocation);
+            UniformResourceLocatorDto robotsTxtURL = new UniformResourceLocatorDto(robotsTxtLocation);
             Optional<RawWebResource> robotsTxtWebResource = httpResourceRetriever.retrieve(robotsTxtURL, USER_AGENT);
 
             if (!robotsTxtWebResource.isPresent()) {
@@ -116,17 +114,8 @@ public class SingleDomainExplorerDaemon implements Runnable {
         return domain.getName() + "/robots.txt";
     }
 
-    private List<UniformResourceLocator> getExplorableURLs(DomainDto domain) {
-        return urlService.getForDomain(domain.getName(),
-                (int) ceil(PERCENTAGE_OF_RESOURCES_TO_CRAWL * getNumberOfResourcesForDomain(domain)));
-    }
-
-    private int getNumberOfResourcesForDomain(DomainDto domain) {
-        return urlService.getCountForDomain(domain.getName());
-    }
-
-    private void exploreNewBatch(List<UniformResourceLocator> urls, DomainDto domain, RobotsPolicy robotsPolicy) throws InterruptedException {
-        for (UniformResourceLocator url : urls) {
+    private void exploreNewBatch(Collection<UniformResourceLocatorDto> urls, DomainDto domain, RobotsPolicy robotsPolicy) throws InterruptedException {
+        for (UniformResourceLocatorDto url : urls) {
             Thread.sleep(RESOURCE_REQUEST_DELAY_IN_MILLISECONDS);
 
             if (!isAllowedToExplore(url, robotsPolicy)) {
@@ -138,15 +127,15 @@ public class SingleDomainExplorerDaemon implements Runnable {
         }
     }
 
-    private void exploreUrl(UniformResourceLocator url, DomainDto domain) {
+    private void exploreUrl(UniformResourceLocatorDto url, DomainDto domain) {
         Optional<RawWebResource> rawWebResource = httpResourceRetriever.retrieve(url, USER_AGENT);
 
         if (!rawWebResource.isPresent()) {
             LOGGER.error("Failed to explore: " + url);
         } else {
-            Pair<WebDocument, UniformResourceLocator> urlDocument = htmlParser.parse(rawWebResource.get(), url);
+            Pair<WebDocument, UniformResourceLocatorDto> urlDocument = htmlParser.parse(rawWebResource.get(), url);
             WebDocument exploredWebDocument = urlDocument.getFirst();
-            UniformResourceLocator exploredUrl = urlDocument.getSecond();
+            UniformResourceLocatorDto exploredUrl = urlDocument.getSecond();
 
             putDiscoveredDomains(exploredUrl.getDomainsReferred());
             putDiscoveredURLs(exploredUrl.getLinksReferred());
@@ -157,7 +146,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
         }
     }
 
-    public boolean isAllowedToExplore(UniformResourceLocator url, RobotsPolicy robotsPolicy) {
+    public boolean isAllowedToExplore(UniformResourceLocatorDto url, RobotsPolicy robotsPolicy) {
         for (String allow : robotsPolicy.getAllow()) {
             if (url.getPath().startsWith(allow)) {
                 return true;
@@ -188,11 +177,11 @@ public class SingleDomainExplorerDaemon implements Runnable {
     }
 
     private void putDiscoveredURLs(Set<String> links) {
-        Map<String, UniformResourceLocator> urls = new HashMap<>();
+        Map<String, UniformResourceLocatorDto> urls = new HashMap<>();
 
         for (String link : links) {
             try {
-                UniformResourceLocator url = new UniformResourceLocator(link);
+                UniformResourceLocatorDto url = new UniformResourceLocatorDto(link);
 
                 url.setLastCrawled(ONE_HUNDRED_YEARS_AGO);
                 urls.put(url.getLocation(), url);
@@ -209,7 +198,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
         storageDaemon.putExploredDomain(domain);
     }
 
-    private void updateCrawledURL(UniformResourceLocator url) {
+    private void updateCrawledURL(UniformResourceLocatorDto url) {
         url.setLastCrawled(now());
         storageDaemon.putExploredURL(url);
     }

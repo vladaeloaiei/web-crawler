@@ -1,7 +1,7 @@
 package com.aeloaiei.dissertation.domainexplorer.http;
 
-import com.aeloaiei.dissertation.domainexplorer.model.nosql.UniformResourceLocator;
 import com.aeloaiei.dissertation.domainexplorer.service.dns.DNSResolver;
+import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -35,7 +35,7 @@ public class HTTPResourceRetriever {
                 .build();
     }
 
-    public Optional<RawWebResource> retrieve(UniformResourceLocator url, String userAgent) {
+    public Optional<RawWebResource> retrieve(UniformResourceLocatorDto url, String userAgent) {
         Optional<RawWebResource> rawWebResource = Optional.empty();
         Request request = new Request.Builder()
                 .url(url.getLocation())

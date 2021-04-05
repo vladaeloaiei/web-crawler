@@ -1,11 +1,11 @@
 package com.aeloaiei.dissertation.domainexplorer.service.daemon;
 
-import com.aeloaiei.dissertation.domainexplorer.model.nosql.UniformResourceLocator;
 import com.aeloaiei.dissertation.domainexplorer.model.nosql.WebDocument;
-import com.aeloaiei.dissertation.domainexplorer.service.nosql.UniformResourceLocatorService;
 import com.aeloaiei.dissertation.domainexplorer.service.nosql.WebDocumentService;
 import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
 import com.aeloaiei.dissertation.domainfeeder.api.dto.DomainDto;
+import com.aeloaiei.dissertation.urlfrontier.api.clients.UrlFrontierClient;
+import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,21 +24,21 @@ public class StorageDaemon implements Runnable {
     @Autowired
     private DomainFeederClient domainFeederClient;
     @Autowired
-    private UniformResourceLocatorService urlService;
+    private UrlFrontierClient urlFrontierClient;
     @Autowired
     private WebDocumentService documentService;
 
     private Map<String, DomainDto> discoveredDomains = new ConcurrentHashMap<>();
-    private Map<String, UniformResourceLocator> discoveredURLs = new ConcurrentHashMap<>();
+    private Map<String, UniformResourceLocatorDto> discoveredURLs = new ConcurrentHashMap<>();
     private Map<String, DomainDto> exploredDomains = new ConcurrentHashMap<>();
-    private Map<String, UniformResourceLocator> exploredURLs = new ConcurrentHashMap<>();
+    private Map<String, UniformResourceLocatorDto> exploredURLs = new ConcurrentHashMap<>();
     private Set<WebDocument> exploredDocuments = ConcurrentHashMap.newKeySet();
 
     public void putDiscoveredDomains(Map<String, DomainDto> domains) {
         discoveredDomains.putAll(domains);
     }
 
-    public void putDiscoveredURLs(Map<String, UniformResourceLocator> urls) {
+    public void putDiscoveredURLs(Map<String, UniformResourceLocatorDto> urls) {
         discoveredURLs.putAll(urls);
     }
 
@@ -46,7 +46,7 @@ public class StorageDaemon implements Runnable {
         exploredDomains.put(domain.getName(), domain);
     }
 
-    public void putExploredURL(UniformResourceLocator url) {
+    public void putExploredURL(UniformResourceLocatorDto url) {
         exploredURLs.put(url.getLocation(), url);
     }
 
@@ -94,19 +94,19 @@ public class StorageDaemon implements Runnable {
     }
 
     private void publishURLs() {
-        Map<String, UniformResourceLocator> tempDiscoveredURLs = discoveredURLs;
-        Map<String, UniformResourceLocator> tempExploredURLs = exploredURLs;
+        Map<String, UniformResourceLocatorDto> tempDiscoveredURLs = discoveredURLs;
+        Map<String, UniformResourceLocatorDto> tempExploredURLs = exploredURLs;
 
         if (!discoveredURLs.isEmpty()) {
             discoveredURLs = new ConcurrentHashMap<>();
             LOGGER.info("Publishing discovered URLs: " + tempDiscoveredURLs.values().toString());
-            urlService.putAllNew(tempDiscoveredURLs.values());
+            urlFrontierClient.putAllNew(tempDiscoveredURLs.values());
         }
 
         if (!exploredURLs.isEmpty()) {
             exploredURLs = new ConcurrentHashMap<>();
             LOGGER.info("Publishing explored URLs: " + tempExploredURLs.values().toString());
-            urlService.putAllExplored(tempExploredURLs.values());
+            urlFrontierClient.putAllExplored(tempExploredURLs.values());
         }
     }
 

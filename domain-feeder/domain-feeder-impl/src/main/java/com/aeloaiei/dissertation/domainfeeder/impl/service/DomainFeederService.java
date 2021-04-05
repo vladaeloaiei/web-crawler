@@ -1,4 +1,4 @@
-package com.aeloaiei.dissertation.domainfeeder.impl.service.nosql;
+package com.aeloaiei.dissertation.domainfeeder.impl.service;
 
 import com.aeloaiei.dissertation.domainfeeder.impl.model.nosql.Domain;
 import com.aeloaiei.dissertation.domainfeeder.impl.repository.nosql.DomainRepository;

@@ -1,6 +1,6 @@
-package com.aeloaiei.dissertation.domainexplorer.repository.nosql;
+package com.aeloaiei.dissertation.urlfrontier.impl.repository.nosql;
 
-import com.aeloaiei.dissertation.domainexplorer.model.nosql.UniformResourceLocator;
+import com.aeloaiei.dissertation.urlfrontier.impl.model.nosql.UniformResourceLocator;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;

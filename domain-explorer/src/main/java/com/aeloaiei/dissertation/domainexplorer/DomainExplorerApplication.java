@@ -1,10 +1,8 @@
 package com.aeloaiei.dissertation.domainexplorer;
 
 
-import com.aeloaiei.dissertation.domainexplorer.model.nosql.UniformResourceLocator;
 import com.aeloaiei.dissertation.domainexplorer.service.daemon.SingleDomainExplorerDaemon;
 import com.aeloaiei.dissertation.domainexplorer.service.daemon.StorageDaemon;
-import com.aeloaiei.dissertation.domainexplorer.service.nosql.UniformResourceLocatorService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +12,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
-import javax.annotation.PostConstruct;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static java.util.Collections.singletonList;
-
-@EnableFeignClients(basePackages = "com.aeloaiei.dissertation.domainfeeder.api")
+@EnableFeignClients(basePackages = {"com.aeloaiei.dissertation.domainfeeder.api", "com.aeloaiei.dissertation.urlfrontier.api"})
 @EnableMongoRepositories(basePackages = "com.aeloaiei.dissertation.domainexplorer.repository.nosql")
 @SpringBootApplication
 public class DomainExplorerApplication implements CommandLineRunner {
@@ -30,8 +25,6 @@ public class DomainExplorerApplication implements CommandLineRunner {
     private SingleDomainExplorerDaemon singleDomainExplorerDaemon;
     @Autowired
     private StorageDaemon storageDaemon;
-    @Autowired
-    private UniformResourceLocatorService uniformResourceLocatorService;
 
     public static void main(String[] args) {
         SpringApplication.run(DomainExplorerApplication.class, args);
@@ -42,10 +35,5 @@ public class DomainExplorerApplication implements CommandLineRunner {
         ExecutorService executor = Executors.newFixedThreadPool(2);
         executor.submit(singleDomainExplorerDaemon);
         executor.submit(storageDaemon);
-    }
-
-    @PostConstruct
-    public void addURL() throws Exception {
-        uniformResourceLocatorService.putAllNew(singletonList(new UniformResourceLocator("https://www.baeldung.com/java-initialize-hashmap")));
     }
 }

@@ -2,7 +2,7 @@ package com.aeloaiei.dissertation.domainfeeder.impl.controller;
 
 import com.aeloaiei.dissertation.domainfeeder.api.dto.DomainDto;
 import com.aeloaiei.dissertation.domainfeeder.impl.model.nosql.Domain;
-import com.aeloaiei.dissertation.domainfeeder.impl.service.nosql.DomainFeederService;
+import com.aeloaiei.dissertation.domainfeeder.impl.service.DomainFeederService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

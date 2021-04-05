@@ -1,7 +1,7 @@
 package com.aeloaiei.dissertation.domainexplorer.http;
 
-import com.aeloaiei.dissertation.domainexplorer.model.nosql.UniformResourceLocator;
 import com.aeloaiei.dissertation.domainexplorer.model.nosql.WebDocument;
+import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
@@ -24,7 +24,7 @@ public class HTMLParser {
     private static final String ROBOTS_NO_INDEX = "noindex";
     private static final String ROBOTS_NONE = "none";
 
-    public Pair<WebDocument, UniformResourceLocator> parse(RawWebResource rawWebResource, UniformResourceLocator url) {
+    public Pair<WebDocument, UniformResourceLocatorDto> parse(RawWebResource rawWebResource, UniformResourceLocatorDto url) {
         Document doc = Jsoup.parse(rawWebResource.getContent(), rawWebResource.getLocation());
         Elements metaElements = doc.getElementsByTag("meta");
         Elements linkElements = doc.getElementsByTag("a");
@@ -122,7 +122,7 @@ public class HTMLParser {
 
         for (String link : links) {
             try {
-                UniformResourceLocator url = new UniformResourceLocator(link);
+                UniformResourceLocatorDto url = new UniformResourceLocatorDto(link);
 
                 domains.add(url.getDomain());
             } catch (Exception e) {
