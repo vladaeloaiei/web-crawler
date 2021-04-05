@@ -32,7 +32,7 @@ public class DomainFeederService {
             if (isValidForCrawling(currentDomain)) {
                 currentDomain.setLastCrawled(now());
 
-                LOGGER.info("Sending domain for crawl: " + domain);
+                LOGGER.info("Sending domain for crawl: " + domain.get());
                 return Optional.of(domainRepository.save(currentDomain));
             } else {
                 LOGGER.warn("No domain available for crawling found");

@@ -1,12 +1,12 @@
-package com.aeloaiei.dissertation.domainexplorer.service.daemon;
+package com.aeloaiei.dissertation.domainexplorer.service;
 
+import com.aeloaiei.dissertation.documenthandler.api.clients.DocumentHandlerClient;
+import com.aeloaiei.dissertation.documenthandler.api.dto.WebDocumentDto;
 import com.aeloaiei.dissertation.domainexplorer.http.HTMLParser;
 import com.aeloaiei.dissertation.domainexplorer.http.HTTPResourceRetriever;
 import com.aeloaiei.dissertation.domainexplorer.http.RawWebResource;
 import com.aeloaiei.dissertation.domainexplorer.http.RobotsPolicy;
 import com.aeloaiei.dissertation.domainexplorer.http.RobotsTxtParser;
-import com.aeloaiei.dissertation.domainexplorer.model.nosql.WebDocument;
-import com.aeloaiei.dissertation.domainexplorer.service.nosql.WebDocumentService;
 import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
 import com.aeloaiei.dissertation.domainfeeder.api.dto.DomainDto;
 import com.aeloaiei.dissertation.urlfrontier.api.clients.UrlFrontierClient;
@@ -39,7 +39,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
     @Autowired
     private UrlFrontierClient urlFrontierClient;
     @Autowired
-    private WebDocumentService webDocumentService;
+    private DocumentHandlerClient documentHandlerClient;
     @Autowired
     private StorageDaemon storageDaemon;
     @Autowired
@@ -133,8 +133,8 @@ public class SingleDomainExplorerDaemon implements Runnable {
         if (!rawWebResource.isPresent()) {
             LOGGER.error("Failed to explore: " + url);
         } else {
-            Pair<WebDocument, UniformResourceLocatorDto> urlDocument = htmlParser.parse(rawWebResource.get(), url);
-            WebDocument exploredWebDocument = urlDocument.getFirst();
+            Pair<WebDocumentDto, UniformResourceLocatorDto> urlDocument = htmlParser.parse(rawWebResource.get(), url);
+            WebDocumentDto exploredWebDocument = urlDocument.getFirst();
             UniformResourceLocatorDto exploredUrl = urlDocument.getSecond();
 
             putDiscoveredDomains(exploredUrl.getDomainsReferred());

@@ -1,6 +1,6 @@
 package com.aeloaiei.dissertation.domainexplorer.http;
 
-import com.aeloaiei.dissertation.domainexplorer.service.dns.DNSResolver;
+import com.aeloaiei.dissertation.domainexplorer.dns.DNSResolver;
 import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

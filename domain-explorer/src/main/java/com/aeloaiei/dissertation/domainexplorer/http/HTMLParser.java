@@ -1,6 +1,6 @@
 package com.aeloaiei.dissertation.domainexplorer.http;
 
-import com.aeloaiei.dissertation.domainexplorer.model.nosql.WebDocument;
+import com.aeloaiei.dissertation.documenthandler.api.dto.WebDocumentDto;
 import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,11 +24,11 @@ public class HTMLParser {
     private static final String ROBOTS_NO_INDEX = "noindex";
     private static final String ROBOTS_NONE = "none";
 
-    public Pair<WebDocument, UniformResourceLocatorDto> parse(RawWebResource rawWebResource, UniformResourceLocatorDto url) {
+    public Pair<WebDocumentDto, UniformResourceLocatorDto> parse(RawWebResource rawWebResource, UniformResourceLocatorDto url) {
         Document doc = Jsoup.parse(rawWebResource.getContent(), rawWebResource.getLocation());
         Elements metaElements = doc.getElementsByTag("meta");
         Elements linkElements = doc.getElementsByTag("a");
-        WebDocument webDocument;
+        WebDocumentDto webDocument;
         Set<String> links = new HashSet<>();
         Set<String> domains = new HashSet<>();
 
@@ -53,7 +53,7 @@ public class HTMLParser {
 
         url.getLinksReferred().addAll(links);
         url.getDomainsReferred().addAll(domains);
-        webDocument = new WebDocument(rawWebResource.getLocation(), content, rawWebResource.getStatus().value());
+        webDocument = new WebDocumentDto(rawWebResource.getLocation(), content, rawWebResource.getStatus().value());
 
         return Pair.of(webDocument, url);
     }

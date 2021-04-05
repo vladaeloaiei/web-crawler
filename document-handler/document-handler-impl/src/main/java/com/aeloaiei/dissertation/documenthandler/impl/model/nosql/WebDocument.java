@@ -1,4 +1,4 @@
-package com.aeloaiei.dissertation.domainexplorer.model.nosql;
+package com.aeloaiei.dissertation.documenthandler.impl.model.nosql;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

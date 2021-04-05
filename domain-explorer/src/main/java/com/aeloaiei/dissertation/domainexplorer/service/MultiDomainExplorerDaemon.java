@@ -1,4 +1,4 @@
-package com.aeloaiei.dissertation.domainexplorer.service.daemon;
+package com.aeloaiei.dissertation.domainexplorer.service;
 
 import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
 import org.springframework.beans.factory.annotation.Autowired;

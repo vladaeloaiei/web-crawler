@@ -1,4 +1,4 @@
-package com.aeloaiei.dissertation.domainexplorer.service.dns;
+package com.aeloaiei.dissertation.domainexplorer.dns;
 
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;

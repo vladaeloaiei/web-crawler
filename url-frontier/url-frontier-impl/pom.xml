@@ -41,7 +41,7 @@
     </dependencies>
 
     <build>
-        <finalName>domain-explorer</finalName>
+        <finalName>url-frontier-impl</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

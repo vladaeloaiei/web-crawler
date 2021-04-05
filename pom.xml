@@ -13,9 +13,9 @@
 
     <modules>
         <module>domain-feeder</module>
-        <module>domain-explorer</module>
         <module>url-frontier</module>
         <module>document-handler</module>
+        <module>domain-explorer</module>
     </modules>
 
     <groupId>com.aeloaiei.dissertation</groupId>

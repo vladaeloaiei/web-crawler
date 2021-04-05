@@ -1,7 +1,7 @@
-package com.aeloaiei.dissertation.domainexplorer.service.daemon;
+package com.aeloaiei.dissertation.domainexplorer.service;
 
-import com.aeloaiei.dissertation.domainexplorer.model.nosql.WebDocument;
-import com.aeloaiei.dissertation.domainexplorer.service.nosql.WebDocumentService;
+import com.aeloaiei.dissertation.documenthandler.api.clients.DocumentHandlerClient;
+import com.aeloaiei.dissertation.documenthandler.api.dto.WebDocumentDto;
 import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
 import com.aeloaiei.dissertation.domainfeeder.api.dto.DomainDto;
 import com.aeloaiei.dissertation.urlfrontier.api.clients.UrlFrontierClient;
@@ -26,13 +26,13 @@ public class StorageDaemon implements Runnable {
     @Autowired
     private UrlFrontierClient urlFrontierClient;
     @Autowired
-    private WebDocumentService documentService;
+    private DocumentHandlerClient documentHandlerClient;
 
     private Map<String, DomainDto> discoveredDomains = new ConcurrentHashMap<>();
     private Map<String, UniformResourceLocatorDto> discoveredURLs = new ConcurrentHashMap<>();
     private Map<String, DomainDto> exploredDomains = new ConcurrentHashMap<>();
     private Map<String, UniformResourceLocatorDto> exploredURLs = new ConcurrentHashMap<>();
-    private Set<WebDocument> exploredDocuments = ConcurrentHashMap.newKeySet();
+    private Set<WebDocumentDto> exploredDocuments = ConcurrentHashMap.newKeySet();
 
     public void putDiscoveredDomains(Map<String, DomainDto> domains) {
         discoveredDomains.putAll(domains);
@@ -50,7 +50,7 @@ public class StorageDaemon implements Runnable {
         exploredURLs.put(url.getLocation(), url);
     }
 
-    public void putExploredDocument(WebDocument document) {
+    public void putExploredDocument(WebDocumentDto document) {
         exploredDocuments.add(document);
     }
 
@@ -111,12 +111,12 @@ public class StorageDaemon implements Runnable {
     }
 
     private void publishDocuments() {
-        Set<WebDocument> tempExploredDocuments = exploredDocuments;
+        Set<WebDocumentDto> tempExploredDocuments = exploredDocuments;
 
         if (!exploredDocuments.isEmpty()) {
             exploredDocuments = ConcurrentHashMap.newKeySet();
             LOGGER.debug("Publishing discovered documents.");
-            documentService.putAll(tempExploredDocuments);
+            documentHandlerClient.putAll(tempExploredDocuments);
         }
     }
 }

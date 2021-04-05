@@ -1,6 +1,6 @@
-package com.aeloaiei.dissertation.domainexplorer.repository.nosql;
+package com.aeloaiei.dissertation.documenthandler.impl.repository.nosql;
 
-import com.aeloaiei.dissertation.domainexplorer.model.nosql.WebDocument;
+import com.aeloaiei.dissertation.documenthandler.impl.model.nosql.WebDocument;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

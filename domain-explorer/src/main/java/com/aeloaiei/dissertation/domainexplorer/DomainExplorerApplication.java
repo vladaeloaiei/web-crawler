@@ -1,8 +1,8 @@
 package com.aeloaiei.dissertation.domainexplorer;
 
 
-import com.aeloaiei.dissertation.domainexplorer.service.daemon.SingleDomainExplorerDaemon;
-import com.aeloaiei.dissertation.domainexplorer.service.daemon.StorageDaemon;
+import com.aeloaiei.dissertation.domainexplorer.service.SingleDomainExplorerDaemon;
+import com.aeloaiei.dissertation.domainexplorer.service.StorageDaemon;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +15,11 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@EnableFeignClients(basePackages = {"com.aeloaiei.dissertation.domainfeeder.api", "com.aeloaiei.dissertation.urlfrontier.api"})
-@EnableMongoRepositories(basePackages = "com.aeloaiei.dissertation.domainexplorer.repository.nosql")
+@EnableFeignClients(basePackages = {
+        "com.aeloaiei.dissertation.domainfeeder.api",
+        "com.aeloaiei.dissertation.urlfrontier.api",
+        "com.aeloaiei.dissertation.documenthandler.api"
+})
 @SpringBootApplication
 public class DomainExplorerApplication implements CommandLineRunner {
     private static final Logger LOGGER = LogManager.getLogger(DomainExplorerApplication.class);
