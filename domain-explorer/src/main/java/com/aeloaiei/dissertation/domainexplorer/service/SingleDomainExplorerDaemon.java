@@ -13,8 +13,8 @@ import com.aeloaiei.dissertation.urlfrontier.api.clients.UrlFrontierClient;
 import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.modelmapper.internal.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
@@ -64,13 +64,13 @@ public class SingleDomainExplorerDaemon implements Runnable {
         try {
             Thread.sleep(RESOURCE_REQUEST_DELAY_IN_MILLISECONDS);
             Pair<DomainDto, RobotsPolicy> domainAndPolicy = getDomainToCrawl();
-            Collection<UniformResourceLocatorDto> urls = urlFrontierClient.getExplorableURLs(domainAndPolicy.getFirst().getName());
+            Collection<UniformResourceLocatorDto> urls = urlFrontierClient.getExplorableURLs(domainAndPolicy.getLeft().getName());
 
             if (urls.isEmpty()) {
-                LOGGER.warn("No url found for domain: " + domainAndPolicy.getFirst().getName());
+                LOGGER.warn("No url found for domain: " + domainAndPolicy.getLeft().getName());
             } else {
-                LOGGER.info("Exploring domain: " + domainAndPolicy.getFirst().getName());
-                exploreNewBatch(urls, domainAndPolicy.getFirst(), domainAndPolicy.getSecond());
+                LOGGER.info("Exploring domain: " + domainAndPolicy.getLeft().getName());
+                exploreNewBatch(urls, domainAndPolicy.getLeft(), domainAndPolicy.getRight());
             }
 
         } catch (RuntimeException e) {
@@ -98,7 +98,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
             UniformResourceLocatorDto robotsTxtURL = new UniformResourceLocatorDto(robotsTxtLocation);
             Optional<RawWebResource> robotsTxtWebResource = httpResourceRetriever.retrieve(robotsTxtURL, USER_AGENT);
 
-            if (!robotsTxtWebResource.isPresent()) {
+            if (!robotsTxtWebResource.isPresent() || robotsTxtWebResource.get().getContent().isEmpty()) {
                 LOGGER.warn("Failed to get robots.txt for domain: " + domain.getName());
             } else {
                 robotsPolicy = robotsTxtWebResource.map(x -> robotsTxtParser.parse(x, USER_AGENT)).get();
@@ -134,8 +134,8 @@ public class SingleDomainExplorerDaemon implements Runnable {
             LOGGER.error("Failed to explore: " + url);
         } else {
             Pair<WebDocumentDto, UniformResourceLocatorDto> urlDocument = htmlParser.parse(rawWebResource.get(), url);
-            WebDocumentDto exploredWebDocument = urlDocument.getFirst();
-            UniformResourceLocatorDto exploredUrl = urlDocument.getSecond();
+            WebDocumentDto exploredWebDocument = urlDocument.getLeft();
+            UniformResourceLocatorDto exploredUrl = urlDocument.getRight();
 
             putDiscoveredDomains(exploredUrl.getDomainsReferred());
             putDiscoveredURLs(exploredUrl.getLinksReferred());

@@ -32,9 +32,9 @@ public class UrlFrontierApplication {
     @PostConstruct
     public void addURL() throws Exception {
         urlFrontierService.putAllNew(singletonList(
-                new UniformResourceLocator("https://www.baeldung.com/java-initialize-hashmap",
-                        "https://www.baeldung.com",
-                        "/java-initialize-hashmap",
+                new UniformResourceLocator("https://www.bbc.com",
+                        "https://www.bbc.com",
+                        "/",
                         LocalDateTime.now(),
                         emptySet(),
                         emptySet())));

@@ -35,4 +35,5 @@ public class UniformResourceLocator {
     private LocalDateTime lastCrawled;
     private Set<String> linksReferred;
     private Set<String> domainsReferred;
+    //TODO add title
 }

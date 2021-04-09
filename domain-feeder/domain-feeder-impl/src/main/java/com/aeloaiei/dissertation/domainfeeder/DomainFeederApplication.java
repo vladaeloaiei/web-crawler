@@ -30,6 +30,6 @@ public class DomainFeederApplication {
 
     @PostConstruct
     public void addDomain() {
-        domainFeederService.putAllNew(singletonList(new Domain("https://www.baeldung.com", now())));
+        domainFeederService.putAllNew(singletonList(new Domain("https://www.bbc.com", now())));
     }
 }

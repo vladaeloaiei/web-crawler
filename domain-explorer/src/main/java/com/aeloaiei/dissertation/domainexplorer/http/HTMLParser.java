@@ -8,7 +8,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.data.util.Pair;
+import org.jsoup.select.NodeTraversor;
+import org.modelmapper.internal.Pair;
 import org.springframework.stereotype.Component;
 
 import java.net.URL;
@@ -79,7 +80,10 @@ public class HTMLParser {
     }
 
     private String getContent(Document document) {
-        return document.text();
+        AppenderNodeVisitor appenderNodeVisitor = new AppenderNodeVisitor();
+        NodeTraversor.traverse(appenderNodeVisitor, document);
+
+        return appenderNodeVisitor.reset();
     }
 
     private Set<String> getLinks(String sourceLink, Elements linkElements) {
