@@ -1,7 +1,7 @@
 package com.aeloaiei.dissertation.domainfeeder.impl.service;
 
-import com.aeloaiei.dissertation.domainfeeder.impl.model.nosql.Domain;
-import com.aeloaiei.dissertation.domainfeeder.impl.repository.nosql.DomainRepository;
+import com.aeloaiei.dissertation.domainfeeder.impl.model.Domain;
+import com.aeloaiei.dissertation.domainfeeder.impl.repository.DomainRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
@@ -12,12 +12,15 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.time.LocalDateTime.now;
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class DomainFeederService {
     private static final Logger LOGGER = LogManager.getLogger(DomainFeederService.class);
     private static final int MINIM_SECONDS_FROM_LAST_CRAWL = 30;
 
+    @Autowired
+    private DomainFilterService domainFilterService;
     @Autowired
     private DomainRepository domainRepository;
     @Autowired
@@ -49,16 +52,18 @@ public class DomainFeederService {
     }
 
     public List<Domain> putAllExplored(List<Domain> domains) {
-        return domainRepository.saveAll(domains);
+        List<Domain> domainsToSave = domains.stream()
+                .filter(domain -> domainFilterService.isAllowed(domain.getName()))
+                .collect(toList());
+        return domainRepository.saveAll(domainsToSave);
     }
 
     public List<Domain> putAllNew(List<Domain> domains) {
-        for (Domain domain : domains) {
-            if (!domainRepository.existsByName(domain.getName())) {
-                domainRepository.save(domain);
-            }
-        }
+        List<Domain> domainsToSave = domains.stream()
+                .filter(domain -> domainFilterService.isAllowed(domain.getName()))
+                .filter(domain -> !domainRepository.existsByName(domain.getName()))
+                .collect(toList());
 
-        return domains;
+        return domainRepository.saveAll(domainsToSave);
     }
 }

@@ -13,7 +13,7 @@ public class MultiDomainExplorerDaemon implements Runnable {
     @Autowired
     private DomainFeederClient domainFeederClient;
 
-    private ExecutorService executor = Executors.newFixedThreadPool(CONCURRENT_DOMAINS_EXPLORER_COUNT);
+    private final ExecutorService executor = Executors.newFixedThreadPool(CONCURRENT_DOMAINS_EXPLORER_COUNT);
 
     @Override
     public void run() {

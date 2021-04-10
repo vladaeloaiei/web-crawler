@@ -1,7 +1,7 @@
 package com.aeloaiei.dissertation.urlfrontier.impl.controller;
 
 import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
-import com.aeloaiei.dissertation.urlfrontier.impl.model.nosql.UniformResourceLocator;
+import com.aeloaiei.dissertation.urlfrontier.impl.model.UniformResourceLocator;
 import com.aeloaiei.dissertation.urlfrontier.impl.service.UrlFrontierService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

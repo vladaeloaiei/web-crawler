@@ -1,6 +1,6 @@
-package com.aeloaiei.dissertation.domainfeeder.impl.repository.nosql;
+package com.aeloaiei.dissertation.domainfeeder.impl.repository;
 
-import com.aeloaiei.dissertation.domainfeeder.impl.model.nosql.Domain;
+import com.aeloaiei.dissertation.domainfeeder.impl.model.Domain;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

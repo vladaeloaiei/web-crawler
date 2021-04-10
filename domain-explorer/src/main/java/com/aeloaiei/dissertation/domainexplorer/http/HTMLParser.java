@@ -32,7 +32,7 @@ public class HTMLParser {
         WebDocumentDto webDocument;
         Set<String> links = new HashSet<>();
         Set<String> domains = new HashSet<>();
-
+        String title = doc.title();
         String content = "";
 
         switch (getPolicy(metaElements)) {
@@ -54,7 +54,7 @@ public class HTMLParser {
 
         url.getLinksReferred().addAll(links);
         url.getDomainsReferred().addAll(domains);
-        webDocument = new WebDocumentDto(rawWebResource.getLocation(), content, rawWebResource.getStatus().value());
+        webDocument = new WebDocumentDto(rawWebResource.getLocation(), title, content, rawWebResource.getStatus().value());
 
         return Pair.of(webDocument, url);
     }

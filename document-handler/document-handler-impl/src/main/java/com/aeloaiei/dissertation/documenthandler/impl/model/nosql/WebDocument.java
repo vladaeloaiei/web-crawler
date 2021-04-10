@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 public class WebDocument {
     @MongoId
     private String location;
+    private String title;
     private String content;
     @HashIndexed
     private int httpStatus;

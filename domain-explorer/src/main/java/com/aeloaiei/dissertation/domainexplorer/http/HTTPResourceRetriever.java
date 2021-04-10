@@ -54,7 +54,7 @@ public class HTTPResourceRetriever {
                 rawWebResource = Optional.of(new RawWebResource(url.getLocation(), response.body().string(), HttpStatus.resolve(response.code())));
             }
         } catch (IOException e) {
-            LOGGER.error("Failed to retrieve resource " + url.getLocation());
+            LOGGER.error("Failed to retrieve resource " + url.getLocation(), e);
         }
 
         return rawWebResource;
