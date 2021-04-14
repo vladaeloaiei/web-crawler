@@ -3,6 +3,7 @@ package com.aeloaiei.dissertation.urlfrontier.api.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,6 +22,8 @@ public class UniformResourceLocatorDto {
     private String location;
     private String domain;
     private String path;
+    private HttpStatus httpStatus;
+    private CrawlingStatus crawlingStatus;
     private LocalDateTime lastCrawled;
     private Set<String> linksReferred;
     private Set<String> domainsReferred;
@@ -34,6 +37,8 @@ public class UniformResourceLocatorDto {
         lastCrawled = now();
         linksReferred = new HashSet<>();
         domainsReferred = new HashSet<>();
+        httpStatus = HttpStatus.FOUND;
+        crawlingStatus = CrawlingStatus.NOT_CRAWLED;
     }
 
     private String buildDomain(URL url) {

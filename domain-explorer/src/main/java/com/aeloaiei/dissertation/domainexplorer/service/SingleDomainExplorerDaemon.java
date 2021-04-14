@@ -10,6 +10,7 @@ import com.aeloaiei.dissertation.domainexplorer.http.RobotsTxtParser;
 import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
 import com.aeloaiei.dissertation.domainfeeder.api.dto.DomainDto;
 import com.aeloaiei.dissertation.urlfrontier.api.clients.UrlFrontierClient;
+import com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus;
 import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +28,8 @@ import java.util.Set;
 
 import static com.aeloaiei.dissertation.domainexplorer.utils.Configuration.RESOURCE_REQUEST_DELAY_IN_MILLISECONDS;
 import static com.aeloaiei.dissertation.domainexplorer.utils.Configuration.USER_AGENT;
+import static com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus.FAILED;
+import static com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus.NOT_ALLOWED_ROBOTS_TXT;
 import static java.time.LocalDateTime.now;
 
 @Service
@@ -38,8 +41,6 @@ public class SingleDomainExplorerDaemon implements Runnable {
     private DomainFeederClient domainFeederClient;
     @Autowired
     private UrlFrontierClient urlFrontierClient;
-    @Autowired
-    private DocumentHandlerClient documentHandlerClient;
     @Autowired
     private StorageDaemon storageDaemon;
     @Autowired
@@ -72,7 +73,6 @@ public class SingleDomainExplorerDaemon implements Runnable {
                 LOGGER.info("Exploring domain: " + domainAndPolicy.getLeft().getName());
                 exploreNewBatch(urls, domainAndPolicy.getLeft(), domainAndPolicy.getRight());
             }
-
         } catch (RuntimeException e) {
             LOGGER.error("Exploring finished with error.. Retrying..", e);
         }
@@ -120,29 +120,29 @@ public class SingleDomainExplorerDaemon implements Runnable {
 
             if (!isAllowedToExplore(url, robotsPolicy)) {
                 LOGGER.debug("Not allowed to explore: " + url.getLocation());
+                url.setCrawlingStatus(NOT_ALLOWED_ROBOTS_TXT);
             } else {
                 LOGGER.debug("Exploring: " + url.getLocation());
-                exploreUrl(url, domain);
+                exploreUrl(url);
             }
+
+            updateCrawledDomain(domain);
+            updateCrawledURL(url);
         }
     }
 
-    private void exploreUrl(UniformResourceLocatorDto url, DomainDto domain) {
+    private void exploreUrl(UniformResourceLocatorDto url) {
         Optional<RawWebResource> rawWebResource = httpResourceRetriever.retrieve(url, USER_AGENT);
 
         if (!rawWebResource.isPresent()) {
             LOGGER.error("Failed to explore: " + url);
+            url.setCrawlingStatus(FAILED);
         } else {
-            Pair<WebDocumentDto, UniformResourceLocatorDto> urlDocument = htmlParser.parse(rawWebResource.get(), url);
-            WebDocumentDto exploredWebDocument = urlDocument.getLeft();
-            UniformResourceLocatorDto exploredUrl = urlDocument.getRight();
+            WebDocumentDto exploredWebDocument = htmlParser.parse(rawWebResource.get(), url);
 
-            putDiscoveredDomains(exploredUrl.getDomainsReferred());
-            putDiscoveredURLs(exploredUrl.getLinksReferred());
+            putDiscoveredDomains(url.getDomainsReferred());
+            putDiscoveredURLs(url.getLinksReferred());
             storageDaemon.putExploredDocument(exploredWebDocument);
-
-            updateCrawledDomain(domain);
-            updateCrawledURL(exploredUrl);
         }
     }
 

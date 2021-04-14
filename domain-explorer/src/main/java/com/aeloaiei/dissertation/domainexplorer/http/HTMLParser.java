@@ -9,13 +9,15 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.jsoup.select.NodeTraversor;
-import org.modelmapper.internal.Pair;
 import org.springframework.stereotype.Component;
 
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+
+import static com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus.NOT_ALLOWED_META_INFO;
+import static com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus.SUCCESS;
 
 @Component
 public class HTMLParser {
@@ -25,11 +27,10 @@ public class HTMLParser {
     private static final String ROBOTS_NO_INDEX = "noindex";
     private static final String ROBOTS_NONE = "none";
 
-    public Pair<WebDocumentDto, UniformResourceLocatorDto> parse(RawWebResource rawWebResource, UniformResourceLocatorDto url) {
+    public WebDocumentDto parse(RawWebResource rawWebResource, UniformResourceLocatorDto url) {
         Document doc = Jsoup.parse(rawWebResource.getContent(), rawWebResource.getLocation());
         Elements metaElements = doc.getElementsByTag("meta");
         Elements linkElements = doc.getElementsByTag("a");
-        WebDocumentDto webDocument;
         Set<String> links = new HashSet<>();
         Set<String> domains = new HashSet<>();
         String title = doc.title();
@@ -40,13 +41,16 @@ public class HTMLParser {
                 content = getContent(doc);
                 links = getLinks(rawWebResource.getLocation(), linkElements);
                 domains = getDomains(links);
+                url.setCrawlingStatus(SUCCESS);
                 break;
             case ROBOTS_NO_FOLLOW:
                 content = getContent(doc);
+                url.setCrawlingStatus(SUCCESS);
                 break;
             case ROBOTS_NO_INDEX:
                 links = getLinks(rawWebResource.getLocation(), linkElements);
                 domains = getDomains(links);
+                url.setCrawlingStatus(NOT_ALLOWED_META_INFO);
                 break;
             default: //ROBOTS_NONE
                 break;
@@ -54,9 +58,8 @@ public class HTMLParser {
 
         url.getLinksReferred().addAll(links);
         url.getDomainsReferred().addAll(domains);
-        webDocument = new WebDocumentDto(rawWebResource.getLocation(), title, content, rawWebResource.getStatus().value());
 
-        return Pair.of(webDocument, url);
+        return new WebDocumentDto(rawWebResource.getLocation(), title, content);
     }
 
     private String getPolicy(Elements metaElements) {

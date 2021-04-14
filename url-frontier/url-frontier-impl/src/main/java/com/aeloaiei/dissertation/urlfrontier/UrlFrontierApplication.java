@@ -1,5 +1,6 @@
 package com.aeloaiei.dissertation.urlfrontier;
 
+import com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus;
 import com.aeloaiei.dissertation.urlfrontier.impl.model.UniformResourceLocator;
 import com.aeloaiei.dissertation.urlfrontier.impl.service.UrlFrontierService;
 import org.modelmapper.ModelMapper;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
@@ -39,6 +41,8 @@ public class UrlFrontierApplication {
                 .map(url -> new UniformResourceLocator(url,
                         "https://www.bbc.com",
                         "/sport",
+                        HttpStatus.FOUND,
+                        CrawlingStatus.NOT_CRAWLED,
                         LocalDateTime.now(),
                         emptySet(),
                         emptySet()))

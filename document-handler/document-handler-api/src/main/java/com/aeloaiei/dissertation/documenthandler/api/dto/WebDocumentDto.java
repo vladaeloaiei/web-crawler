@@ -11,5 +11,4 @@ public class WebDocumentDto {
     private String location;
     private String title;
     private String content;
-    private int httpStatus;
 }

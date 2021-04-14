@@ -11,5 +11,4 @@ import org.springframework.http.HttpStatus;
 public class RawWebResource {
     private String location;
     private String content;
-    private HttpStatus status;
 }

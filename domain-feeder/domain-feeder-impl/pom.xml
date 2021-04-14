@@ -37,7 +37,7 @@
     </dependencies>
 
     <build>
-        <finalName>domain-feeder-impl</finalName>
+        <finalName>domain-feeder</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

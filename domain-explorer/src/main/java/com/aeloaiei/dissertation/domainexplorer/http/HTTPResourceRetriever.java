@@ -45,14 +45,16 @@ public class HTTPResourceRetriever {
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 LOGGER.debug("Unable to retrieve resource: " + url.getLocation() + " http code: " + response.code());
-                rawWebResource = Optional.of(new RawWebResource(url.getLocation(), "", HttpStatus.resolve(response.code())));
+                rawWebResource = Optional.of(new RawWebResource(url.getLocation(), ""));
             } else if (isNull(response.body())) {
                 LOGGER.debug("Resource: " + url.getLocation() + " has empty body");
-                rawWebResource = Optional.of(new RawWebResource(url.getLocation(), "", HttpStatus.resolve(response.code())));
+                rawWebResource = Optional.of(new RawWebResource(url.getLocation(), ""));
             } else {
                 LOGGER.debug("Resource: " + url.getLocation() + " successfully retrieved");
-                rawWebResource = Optional.of(new RawWebResource(url.getLocation(), response.body().string(), HttpStatus.resolve(response.code())));
+                rawWebResource = Optional.of(new RawWebResource(url.getLocation(), response.body().string()));
             }
+
+            url.setHttpStatus(HttpStatus.resolve(response.code()));
         } catch (IOException e) {
             LOGGER.error("Failed to retrieve resource " + url.getLocation(), e);
         }

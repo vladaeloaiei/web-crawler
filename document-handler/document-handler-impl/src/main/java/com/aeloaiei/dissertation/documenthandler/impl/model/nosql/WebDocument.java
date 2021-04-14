@@ -16,6 +16,4 @@ public class WebDocument {
     private String location;
     private String title;
     private String content;
-    @HashIndexed
-    private int httpStatus;
 }

@@ -1,5 +1,6 @@
 package com.aeloaiei.dissertation.urlfrontier.impl.model;
 
+import com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.index.HashIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -30,6 +32,8 @@ public class UniformResourceLocator {
     @HashIndexed
     private String domain;
     private String path;
+    private HttpStatus httpStatus;
+    private CrawlingStatus crawlingStatus;
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime lastCrawled;

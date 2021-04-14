@@ -40,7 +40,7 @@
     </dependencies>
 
     <build>
-        <finalName>document-handler-impl</finalName>
+        <finalName>document-handler</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
