@@ -1,12 +1,12 @@
 package com.aeloaiei.dissertation.urlfrontier.impl.service;
 
+import com.aeloaiei.dissertation.urlfrontier.impl.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,13 +15,11 @@ public class DomainFilterService {
     private Set<String> allowedDomains;
 
     @Autowired
-    public DomainFilterService(ResourceLoader resourceLoader) {
+    public DomainFilterService(Configuration config) {
         try {
-            Resource resource = resourceLoader.getResource("classpath:allowed.txt");
-
-            allowedDomains = new HashSet<>(Files.readAllLines(resource.getFile().toPath()));
+            allowedDomains = new HashSet<>(Files.readAllLines(Paths.get(config.allowedDomainsFilePath)));
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load the allowed.txt config file", e);
+            throw new RuntimeException("Failed to load the allowed_domains.txt config file", e);
         }
     }
 

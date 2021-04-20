@@ -2,6 +2,7 @@ package com.aeloaiei.dissertation.domainexplorer.service;
 
 import com.aeloaiei.dissertation.documenthandler.api.clients.DocumentHandlerClient;
 import com.aeloaiei.dissertation.documenthandler.api.dto.WebDocumentDto;
+import com.aeloaiei.dissertation.domainexplorer.config.Configuration;
 import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
 import com.aeloaiei.dissertation.domainfeeder.api.dto.DomainDto;
 import com.aeloaiei.dissertation.urlfrontier.api.clients.UrlFrontierClient;
@@ -15,12 +16,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.aeloaiei.dissertation.domainexplorer.utils.Configuration.METADATA_UPDATE_WINDOW_IN_MILLISECONDS;
-
 @Service
 public class StorageDaemon implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger(StorageDaemon.class);
 
+    @Autowired
+    private Configuration config;
     @Autowired
     private DomainFeederClient domainFeederClient;
     @Autowired
@@ -67,7 +68,7 @@ public class StorageDaemon implements Runnable {
 
     private void publish() throws InterruptedException {
         try {
-            Thread.sleep(METADATA_UPDATE_WINDOW_IN_MILLISECONDS);
+            Thread.sleep(config.metadataUpdateWindow);
             publishDomains();
             publishURLs();
             publishDocuments();

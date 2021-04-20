@@ -29,6 +29,7 @@
         <spring.version>2.3.9.RELEASE</spring.version>
         <spring-cloud.version>2.1.0.RELEASE</spring-cloud.version>
         <jsoup.version>1.13.1</jsoup.version>
+        <maven.exec.plugin.version>3.0.0</maven.exec.plugin.version>
     </properties>
 
     <dependencyManagement>

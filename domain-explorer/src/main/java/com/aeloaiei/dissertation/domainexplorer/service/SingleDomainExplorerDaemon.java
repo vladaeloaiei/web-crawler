@@ -1,7 +1,7 @@
 package com.aeloaiei.dissertation.domainexplorer.service;
 
-import com.aeloaiei.dissertation.documenthandler.api.clients.DocumentHandlerClient;
 import com.aeloaiei.dissertation.documenthandler.api.dto.WebDocumentDto;
+import com.aeloaiei.dissertation.domainexplorer.config.Configuration;
 import com.aeloaiei.dissertation.domainexplorer.http.HTMLParser;
 import com.aeloaiei.dissertation.domainexplorer.http.HTTPResourceRetriever;
 import com.aeloaiei.dissertation.domainexplorer.http.RawWebResource;
@@ -10,7 +10,6 @@ import com.aeloaiei.dissertation.domainexplorer.http.RobotsTxtParser;
 import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
 import com.aeloaiei.dissertation.domainfeeder.api.dto.DomainDto;
 import com.aeloaiei.dissertation.urlfrontier.api.clients.UrlFrontierClient;
-import com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus;
 import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,8 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.aeloaiei.dissertation.domainexplorer.utils.Configuration.RESOURCE_REQUEST_DELAY_IN_MILLISECONDS;
-import static com.aeloaiei.dissertation.domainexplorer.utils.Configuration.USER_AGENT;
 import static com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus.FAILED;
 import static com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus.NOT_ALLOWED_ROBOTS_TXT;
 import static java.time.LocalDateTime.now;
@@ -37,6 +34,8 @@ public class SingleDomainExplorerDaemon implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger(SingleDomainExplorerDaemon.class);
     private static final LocalDateTime ONE_HUNDRED_YEARS_AGO = now().minusYears(100);
 
+    @Autowired
+    private Configuration config;
     @Autowired
     private DomainFeederClient domainFeederClient;
     @Autowired
@@ -63,7 +62,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
 
     private void explore() throws InterruptedException {
         try {
-            Thread.sleep(RESOURCE_REQUEST_DELAY_IN_MILLISECONDS);
+            Thread.sleep(config.resourceRequestDelay);
             Pair<DomainDto, RobotsPolicy> domainAndPolicy = getDomainToCrawl();
             Collection<UniformResourceLocatorDto> urls = urlFrontierClient.getExplorableURLs(domainAndPolicy.getLeft().getName());
 
@@ -92,16 +91,16 @@ public class SingleDomainExplorerDaemon implements Runnable {
 
     private RobotsPolicy getRobotsPolicy(DomainDto domain) {
         String robotsTxtLocation = getRobotsTxtLocation(domain);
-        RobotsPolicy robotsPolicy = new RobotsPolicy(USER_AGENT);
+        RobotsPolicy robotsPolicy = new RobotsPolicy(config.userAgent);
 
         try {
             UniformResourceLocatorDto robotsTxtURL = new UniformResourceLocatorDto(robotsTxtLocation);
-            Optional<RawWebResource> robotsTxtWebResource = httpResourceRetriever.retrieve(robotsTxtURL, USER_AGENT);
+            Optional<RawWebResource> robotsTxtWebResource = httpResourceRetriever.retrieve(robotsTxtURL, config.userAgent);
 
             if (!robotsTxtWebResource.isPresent() || robotsTxtWebResource.get().getContent().isEmpty()) {
                 LOGGER.warn("Failed to get robots.txt for domain: " + domain.getName());
             } else {
-                robotsPolicy = robotsTxtWebResource.map(x -> robotsTxtParser.parse(x, USER_AGENT)).get();
+                robotsPolicy = robotsTxtWebResource.map(x -> robotsTxtParser.parse(x, config.userAgent)).get();
             }
         } catch (MalformedURLException e) {
             LOGGER.warn("Malformed robots.txt URL : " + robotsTxtLocation);
@@ -116,7 +115,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
 
     private void exploreNewBatch(Collection<UniformResourceLocatorDto> urls, DomainDto domain, RobotsPolicy robotsPolicy) throws InterruptedException {
         for (UniformResourceLocatorDto url : urls) {
-            Thread.sleep(RESOURCE_REQUEST_DELAY_IN_MILLISECONDS);
+            Thread.sleep(config.resourceRequestDelay);
 
             if (!isAllowedToExplore(url, robotsPolicy)) {
                 LOGGER.debug("Not allowed to explore: " + url.getLocation());
@@ -132,7 +131,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
     }
 
     private void exploreUrl(UniformResourceLocatorDto url) {
-        Optional<RawWebResource> rawWebResource = httpResourceRetriever.retrieve(url, USER_AGENT);
+        Optional<RawWebResource> rawWebResource = httpResourceRetriever.retrieve(url, config.userAgent);
 
         if (!rawWebResource.isPresent()) {
             LOGGER.error("Failed to explore: " + url);

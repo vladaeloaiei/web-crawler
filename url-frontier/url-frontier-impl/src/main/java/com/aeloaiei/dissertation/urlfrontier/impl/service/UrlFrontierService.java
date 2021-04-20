@@ -1,8 +1,8 @@
 package com.aeloaiei.dissertation.urlfrontier.impl.service;
 
+import com.aeloaiei.dissertation.urlfrontier.impl.config.Configuration;
 import com.aeloaiei.dissertation.urlfrontier.impl.model.UniformResourceLocator;
 import com.aeloaiei.dissertation.urlfrontier.impl.repository.UniformResourceLocatorRepository;
-import com.aeloaiei.dissertation.urlfrontier.impl.utils.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +14,15 @@ import java.util.Collection;
 import java.util.List;
 
 import static java.lang.Math.ceil;
+import static java.time.LocalDateTime.now;
 import static java.util.stream.Collectors.toList;
 
 @Service
 public class UrlFrontierService {
     private static final Logger LOGGER = LogManager.getLogger(UrlFrontierService.class);
 
+    @Autowired
+    private Configuration config;
     @Autowired
     private DomainFilterService domainFilterService;
     @Autowired
@@ -45,11 +48,16 @@ public class UrlFrontierService {
     }
 
     public List<UniformResourceLocator> getExplorableURLs(String domain) {
-        int count = (int) ceil(Configuration.PERCENTAGE_OF_RESOURCES_TO_CRAWL * getNumberOfResourcesForDomain(domain));
+        int count = (int) ceil(config.crawlPercentage * getNumberOfResourcesForDomain(domain));
         List<UniformResourceLocator> urls = getForDomain(domain, count);
 
+        updateCrawlTimeForUrls(urls);
         LOGGER.info("Sending for crawling " + urls.size() + " urls: " + urls);
         return urls;
+    }
+
+    private int getNumberOfResourcesForDomain(String domain) {
+        return uniformResourceLocatorRepository.countByDomain(domain);
     }
 
     private List<UniformResourceLocator> getForDomain(String domain, int count) {
@@ -58,7 +66,8 @@ public class UrlFrontierService {
         return uniformResourceLocatorRepository.findByDomainOrderByPathDesc(domain, pageable);
     }
 
-    private int getNumberOfResourcesForDomain(String domain) {
-        return uniformResourceLocatorRepository.countByDomain(domain);
+    private void updateCrawlTimeForUrls(List<UniformResourceLocator> urls) {
+        urls.forEach(url -> url.setLastCrawled(now()));
+        uniformResourceLocatorRepository.saveAll(urls);
     }
 }

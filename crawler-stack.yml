@@ -1,0 +1,64 @@
+version: '3.9'
+
+services:
+
+  domain-feeder:
+    image: domain-feeder:latest
+    hostname: domain-feeder
+    deploy:
+      mode: global
+    configs:
+      - source: allowed-domains
+        target: /configs/allowed_domains.txt
+    environment:
+      SPRING_PROFILES_ACTIVE: 'demo'
+    networks:
+      crawler-network:
+      data-lake-stack_data-lake-network:
+
+  url-frontier:
+    image: url-frontier:latest
+    hostname: url-frontier
+    deploy:
+      mode: global
+    configs:
+      - source: allowed-domains
+        target: /configs/allowed_domains.txt
+    environment:
+      SPRING_PROFILES_ACTIVE: 'demo'
+    networks:
+      crawler-network:
+      data-lake-stack_data-lake-network:
+
+  document-handler:
+    image: document-handler:latest
+    hostname: document-handler
+    deploy:
+      mode: global
+    environment:
+      SPRING_PROFILES_ACTIVE: 'demo'
+    networks:
+      crawler-network:
+      data-lake-stack_data-lake-network:
+
+  domain-explorer:
+    image: domain-explorer:latest
+    deploy:
+      replicas: 1
+    depends_on:
+      - domain-feeder
+      - url-frontier
+      - document-handler
+    environment:
+      SPRING_PROFILES_ACTIVE: 'demo'
+    networks:
+      crawler-network:
+
+configs:
+  allowed-domains:
+    file: ./allowed_domains.txt
+
+networks:
+  crawler-network:
+  data-lake-stack_data-lake-network:
+    external: true
