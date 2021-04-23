@@ -1,6 +1,5 @@
 package com.aeloaiei.dissertation.domainexplorer.http;
 
-import com.aeloaiei.dissertation.domainexplorer.dns.DNSResolver;
 import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -14,26 +13,15 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.isNull;
 
 @Component
 public class HTTPResourceRetriever {
     private static final Logger LOGGER = LogManager.getLogger(HTTPResourceRetriever.class);
-    private static final int CONNECTION_TIMEOUT = 2000;
-
-    private OkHttpClient httpClient;
 
     @Autowired
-    public HTTPResourceRetriever(DNSResolver dnsResolver) {
-        httpClient = new OkHttpClient.Builder()
-                .dns(dnsResolver)
-                .retryOnConnectionFailure(false)
-                .followRedirects(true)
-                .readTimeout(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS)
-                .build();
-    }
+    private OkHttpClient httpClient;
 
     public Optional<RawWebResource> retrieve(UniformResourceLocatorDto url, String userAgent) {
         Optional<RawWebResource> rawWebResource = Optional.empty();

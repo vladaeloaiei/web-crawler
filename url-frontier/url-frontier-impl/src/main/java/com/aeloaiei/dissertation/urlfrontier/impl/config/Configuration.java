@@ -10,4 +10,7 @@ public class Configuration {
 
     @Value("${config.allowed.domains.path}")
     public String allowedDomainsFilePath;
+
+    @Value("${config.startup.urls.path}")
+    public String startupUrlsPath;
 }

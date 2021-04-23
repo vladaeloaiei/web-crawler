@@ -34,20 +34,30 @@ public class SingleDomainExplorerDaemon implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger(SingleDomainExplorerDaemon.class);
     private static final LocalDateTime ONE_HUNDRED_YEARS_AGO = now().minusYears(100);
 
-    @Autowired
     private Configuration config;
-    @Autowired
     private DomainFeederClient domainFeederClient;
-    @Autowired
     private UrlFrontierClient urlFrontierClient;
-    @Autowired
     private StorageDaemon storageDaemon;
-    @Autowired
     private HTTPResourceRetriever httpResourceRetriever;
-    @Autowired
     private HTMLParser htmlParser;
-    @Autowired
     private RobotsTxtParser robotsTxtParser;
+
+    @Autowired
+    public SingleDomainExplorerDaemon(Configuration config,
+                                      DomainFeederClient domainFeederClient,
+                                      UrlFrontierClient urlFrontierClient,
+                                      StorageDaemon storageDaemon,
+                                      HTTPResourceRetriever httpResourceRetriever,
+                                      HTMLParser htmlParser,
+                                      RobotsTxtParser robotsTxtParser) {
+        this.config = config;
+        this.domainFeederClient = domainFeederClient;
+        this.urlFrontierClient = urlFrontierClient;
+        this.storageDaemon = storageDaemon;
+        this.httpResourceRetriever = httpResourceRetriever;
+        this.htmlParser = htmlParser;
+        this.robotsTxtParser = robotsTxtParser;
+    }
 
     @Override
     public void run() {

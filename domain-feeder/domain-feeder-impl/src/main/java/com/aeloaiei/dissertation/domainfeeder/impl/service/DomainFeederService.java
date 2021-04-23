@@ -4,7 +4,6 @@ import com.aeloaiei.dissertation.domainfeeder.impl.model.Domain;
 import com.aeloaiei.dissertation.domainfeeder.impl.repository.DomainRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +21,6 @@ public class DomainFeederService {
     private DomainFilterService domainFilterService;
     @Autowired
     private DomainRepository domainRepository;
-    @Autowired
-    private ModelMapper modelMapper;
 
     public Optional<Domain> getCrawlableDomain() {
         Optional<Domain> domain = domainRepository.findTopByOrderByLastCrawledAsc();
