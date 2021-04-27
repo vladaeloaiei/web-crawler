@@ -30,9 +30,9 @@ public class DomainFeederService {
 
             currentDomain.setLastCrawled(now());
 
+            //TODO check if is allowed
             LOGGER.info("Sending domain for crawl: " + domain.get());
             return Optional.of(domainRepository.save(currentDomain));
-
         } else {
             LOGGER.warn("No domain found");
         }

@@ -83,13 +83,13 @@ public class StorageDaemon implements Runnable {
 
         if (!discoveredDomains.isEmpty()) {
             discoveredDomains = new ConcurrentHashMap<>();
-            LOGGER.debug("Publishing discovered domains: " + tempDiscoveredDomains.values().toString());
+            LOGGER.debug("Publishing " + tempDiscoveredDomains.values().size() + " discovered domains");
             domainFeederClient.putNewDomains(tempDiscoveredDomains.values());
         }
 
         if (!exploredDomains.isEmpty()) {
             exploredDomains = new ConcurrentHashMap<>();
-            LOGGER.debug("Publishing explored domains: " + tempExploredDomains.values().toString());
+            LOGGER.debug("Publishing " + tempExploredDomains.values() + " explored domains");
             domainFeederClient.putExploredDomains(tempExploredDomains.values());
         }
     }
@@ -100,13 +100,13 @@ public class StorageDaemon implements Runnable {
 
         if (!discoveredURLs.isEmpty()) {
             discoveredURLs = new ConcurrentHashMap<>();
-            LOGGER.info("Publishing discovered URLs: " + tempDiscoveredURLs.values().toString());
+            LOGGER.info("Publishing " + tempDiscoveredURLs.values().size() + " discovered URLs");
             urlFrontierClient.putAllNew(tempDiscoveredURLs.values());
         }
 
         if (!exploredURLs.isEmpty()) {
             exploredURLs = new ConcurrentHashMap<>();
-            LOGGER.info("Publishing explored URLs: " + tempExploredURLs.values().toString());
+            LOGGER.info("Publishing " + tempExploredURLs.values().size() + " explored URLs");
             urlFrontierClient.putAllExplored(tempExploredURLs.values());
         }
     }

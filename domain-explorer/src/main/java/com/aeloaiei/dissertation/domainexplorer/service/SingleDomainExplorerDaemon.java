@@ -72,7 +72,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
 
     private void explore() throws InterruptedException {
         try {
-            Thread.sleep(config.resourceRequestDelay);
+            Thread.sleep(getRandomDelay());
             Pair<DomainDto, RobotsPolicy> domainAndPolicy = getDomainToCrawl();
             Collection<UniformResourceLocatorDto> urls = urlFrontierClient.getExplorableURLs(domainAndPolicy.getLeft().getName());
 
@@ -87,10 +87,16 @@ public class SingleDomainExplorerDaemon implements Runnable {
         }
     }
 
+    private long getRandomDelay() {
+        return (long) (1000 * Math.random()) + config.resourceRequestDelay;
+    }
+
     private Pair<DomainDto, RobotsPolicy> getDomainToCrawl() {
         try {
-
             DomainDto domainDto = domainFeederClient.getCrawlableDomain();
+
+            LOGGER.info("Received domain to crawl: " + domainDto.getName());
+
             RobotsPolicy robotsPolicy = getRobotsPolicy(domainDto);
 
             return Pair.of(domainDto, robotsPolicy);
@@ -125,7 +131,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
 
     private void exploreNewBatch(Collection<UniformResourceLocatorDto> urls, DomainDto domain, RobotsPolicy robotsPolicy) throws InterruptedException {
         for (UniformResourceLocatorDto url : urls) {
-            Thread.sleep(config.resourceRequestDelay);
+            Thread.sleep(getRandomDelay());
 
             if (!isAllowedToExplore(url, robotsPolicy)) {
                 LOGGER.debug("Not allowed to explore: " + url.getLocation());

@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import static java.time.LocalDateTime.now;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 @SpringBootApplication

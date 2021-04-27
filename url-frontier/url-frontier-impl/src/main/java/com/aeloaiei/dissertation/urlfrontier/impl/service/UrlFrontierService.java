@@ -33,7 +33,7 @@ public class UrlFrontierService {
                 .filter(url -> domainFilterService.isAllowed(url.getDomain()))
                 .collect(toList());
 
-        LOGGER.info("Updating explored urls: " + urlsToSave);
+        LOGGER.info("Updating " + urlsToSave.size() + " explored urls");
         uniformResourceLocatorRepository.saveAll(urlsToSave);
     }
 
@@ -43,7 +43,7 @@ public class UrlFrontierService {
                 .filter(url -> !uniformResourceLocatorRepository.existsByLocation(url.getLocation()))
                 .collect(toList());
 
-        LOGGER.info("Saving new urls: " + urlsToSave);
+        LOGGER.info("Saving " + urlsToSave.size() + " new urls");
         uniformResourceLocatorRepository.saveAll(urlsToSave);
     }
 
@@ -52,7 +52,7 @@ public class UrlFrontierService {
         List<UniformResourceLocator> urls = getForDomain(domain, count);
 
         updateCrawlTimeForUrls(urls);
-        LOGGER.info("Sending for crawling " + urls.size() + " urls: " + urls);
+        LOGGER.info("Sending for crawling " + urls.size() + " urls");
         return urls;
     }
 
@@ -63,7 +63,7 @@ public class UrlFrontierService {
     private List<UniformResourceLocator> getForDomain(String domain, int count) {
         Pageable pageable = PageRequest.of(0, count);
 
-        return uniformResourceLocatorRepository.findByDomainOrderByPathDesc(domain, pageable);
+        return uniformResourceLocatorRepository.findByDomainOrderByLastCrawledAsc(domain, pageable);
     }
 
     private void updateCrawlTimeForUrls(List<UniformResourceLocator> urls) {

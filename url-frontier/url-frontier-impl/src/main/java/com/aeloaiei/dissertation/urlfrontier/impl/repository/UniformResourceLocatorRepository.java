@@ -9,9 +9,7 @@ import java.util.List;
 
 @Repository
 public interface UniformResourceLocatorRepository extends MongoRepository<UniformResourceLocator, String> {
-    List<UniformResourceLocator> findAllByDomain(String domain, Pageable pageable);
-
-    List<UniformResourceLocator> findByDomainOrderByPathDesc(String domain, Pageable pageable);
+    List<UniformResourceLocator> findByDomainOrderByLastCrawledAsc(String domain, Pageable pageable);
 
     boolean existsByLocation(String location);
 

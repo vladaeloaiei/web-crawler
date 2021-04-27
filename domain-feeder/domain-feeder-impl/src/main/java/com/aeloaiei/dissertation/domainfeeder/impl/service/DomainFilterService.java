@@ -24,6 +24,6 @@ public class DomainFilterService {
     }
 
     public boolean isAllowed(String domain) {
-        return allowedDomains.contains(domain);
+        return allowedDomains.isEmpty() || allowedDomains.contains(domain);
     }
 }
