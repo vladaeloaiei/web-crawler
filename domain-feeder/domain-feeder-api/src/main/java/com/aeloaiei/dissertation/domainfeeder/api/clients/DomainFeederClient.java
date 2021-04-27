@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Collection;
 
-@FeignClient(value = "DomainFeederClient", url = "${feign.client.domain.feeder.url}") //http://localhost:9001/domainfeeder
+@FeignClient(name = "DomainFeederClient", url = "${feign.client.domain.feeder.url}/domainfeeder")
 public interface DomainFeederClient {
     @GetMapping
     DomainDto getCrawlableDomain();

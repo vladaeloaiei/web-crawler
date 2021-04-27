@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Collection;
 
-@FeignClient(value = "UrlFrontierClient", url = "${feign.client.url.frontier.url}") //http://localhost:9002/urlfrontier
+@FeignClient(name = "UrlFrontierClient", url = "${feign.client.url.frontier.url}/urlfrontier")
 public interface UrlFrontierClient {
     @PutMapping("/explored")
     public void putAllExplored(@RequestBody Collection<UniformResourceLocatorDto> urlDtos);
