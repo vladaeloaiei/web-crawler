@@ -1,4 +1,4 @@
-package com.aeloaiei.dissertation.domainexplorer.http;
+package com.aeloaiei.dissertation.domain.explorer.http;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

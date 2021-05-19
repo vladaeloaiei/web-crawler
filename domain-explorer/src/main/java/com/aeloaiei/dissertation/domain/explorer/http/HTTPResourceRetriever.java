@@ -1,4 +1,4 @@
-package com.aeloaiei.dissertation.domainexplorer.http;
+package com.aeloaiei.dissertation.domain.explorer.http;
 
 import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
 import okhttp3.OkHttpClient;

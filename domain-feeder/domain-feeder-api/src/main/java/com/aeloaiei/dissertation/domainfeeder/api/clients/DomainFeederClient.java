@@ -13,9 +13,6 @@ public interface DomainFeederClient {
     @GetMapping
     DomainDto getCrawlableDomain();
 
-    @PutMapping("/explored")
-    void putExploredDomains(@RequestBody Collection<DomainDto> domainDtos);
-
     @PutMapping("/new")
-    void putNewDomains(@RequestBody Collection<DomainDto> domainDtos);
+    Collection<DomainDto> put(@RequestBody Collection<DomainDto> domainDtos);
 }

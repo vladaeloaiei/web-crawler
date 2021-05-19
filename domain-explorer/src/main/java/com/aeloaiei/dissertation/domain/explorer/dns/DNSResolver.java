@@ -1,4 +1,4 @@
-package com.aeloaiei.dissertation.domainexplorer.dns;
+package com.aeloaiei.dissertation.domain.explorer.dns;
 
 import io.netty.resolver.dns.DnsNameResolver;
 import okhttp3.Dns;

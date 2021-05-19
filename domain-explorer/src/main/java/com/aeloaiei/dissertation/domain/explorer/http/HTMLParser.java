@@ -1,4 +1,4 @@
-package com.aeloaiei.dissertation.domainexplorer.http;
+package com.aeloaiei.dissertation.domain.explorer.http;
 
 import com.aeloaiei.dissertation.documenthandler.api.dto.WebDocumentDto;
 import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
@@ -49,7 +49,6 @@ public class HTMLParser {
                 break;
             case ROBOTS_NO_INDEX:
                 links = getLinks(rawWebResource.getLocation(), linkElements);
-                domains = getDomains(links);
                 url.setCrawlingStatus(NOT_ALLOWED_META_INFO);
                 break;
             default: //ROBOTS_NONE

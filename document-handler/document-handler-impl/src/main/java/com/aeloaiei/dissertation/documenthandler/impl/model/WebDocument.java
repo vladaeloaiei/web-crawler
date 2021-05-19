@@ -1,9 +1,8 @@
-package com.aeloaiei.dissertation.documenthandler.impl.model.nosql;
+package com.aeloaiei.dissertation.documenthandler.impl.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.mongodb.core.index.HashIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 

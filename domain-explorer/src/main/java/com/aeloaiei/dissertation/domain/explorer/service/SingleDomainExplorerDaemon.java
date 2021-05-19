@@ -1,29 +1,23 @@
-package com.aeloaiei.dissertation.domainexplorer.service;
+package com.aeloaiei.dissertation.domain.explorer.service;
 
 import com.aeloaiei.dissertation.documenthandler.api.dto.WebDocumentDto;
-import com.aeloaiei.dissertation.domainexplorer.config.Configuration;
-import com.aeloaiei.dissertation.domainexplorer.http.HTMLParser;
-import com.aeloaiei.dissertation.domainexplorer.http.HTTPResourceRetriever;
-import com.aeloaiei.dissertation.domainexplorer.http.RawWebResource;
-import com.aeloaiei.dissertation.domainexplorer.http.RobotsPolicy;
-import com.aeloaiei.dissertation.domainexplorer.http.RobotsTxtParser;
-import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
-import com.aeloaiei.dissertation.domainfeeder.api.dto.DomainDto;
+import com.aeloaiei.dissertation.domain.explorer.config.Configuration;
+import com.aeloaiei.dissertation.domain.explorer.http.HTMLParser;
+import com.aeloaiei.dissertation.domain.explorer.http.HTTPResourceRetriever;
+import com.aeloaiei.dissertation.domain.explorer.http.RawWebResource;
+import com.aeloaiei.dissertation.domain.explorer.http.RobotsPolicy;
+import com.aeloaiei.dissertation.domain.explorer.http.RobotsTxtParser;
 import com.aeloaiei.dissertation.urlfrontier.api.clients.UrlFrontierClient;
 import com.aeloaiei.dissertation.urlfrontier.api.dto.UniformResourceLocatorDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.modelmapper.internal.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.MalformedURLException;
-import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus.FAILED;
 import static com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus.NOT_ALLOWED_ROBOTS_TXT;
@@ -32,10 +26,8 @@ import static java.time.LocalDateTime.now;
 @Service
 public class SingleDomainExplorerDaemon implements Runnable {
     private static final Logger LOGGER = LogManager.getLogger(SingleDomainExplorerDaemon.class);
-    private static final LocalDateTime ONE_HUNDRED_YEARS_AGO = now().minusYears(100);
 
     private Configuration config;
-    private DomainFeederClient domainFeederClient;
     private UrlFrontierClient urlFrontierClient;
     private StorageDaemon storageDaemon;
     private HTTPResourceRetriever httpResourceRetriever;
@@ -44,14 +36,12 @@ public class SingleDomainExplorerDaemon implements Runnable {
 
     @Autowired
     public SingleDomainExplorerDaemon(Configuration config,
-                                      DomainFeederClient domainFeederClient,
                                       UrlFrontierClient urlFrontierClient,
                                       StorageDaemon storageDaemon,
                                       HTTPResourceRetriever httpResourceRetriever,
                                       HTMLParser htmlParser,
                                       RobotsTxtParser robotsTxtParser) {
         this.config = config;
-        this.domainFeederClient = domainFeederClient;
         this.urlFrontierClient = urlFrontierClient;
         this.storageDaemon = storageDaemon;
         this.httpResourceRetriever = httpResourceRetriever;
@@ -73,14 +63,16 @@ public class SingleDomainExplorerDaemon implements Runnable {
     private void explore() throws InterruptedException {
         try {
             Thread.sleep(getRandomDelay());
-            Pair<DomainDto, RobotsPolicy> domainAndPolicy = getDomainToCrawl();
-            Collection<UniformResourceLocatorDto> urls = urlFrontierClient.getExplorableURLs(domainAndPolicy.getLeft().getName());
+            List<UniformResourceLocatorDto> urls = getUrlsToCrawl();
 
             if (urls.isEmpty()) {
-                LOGGER.warn("No url found for domain: " + domainAndPolicy.getLeft().getName());
+                LOGGER.warn("No url received.. Retrying.. ");
             } else {
-                LOGGER.info("Exploring domain: " + domainAndPolicy.getLeft().getName());
-                exploreNewBatch(urls, domainAndPolicy.getLeft(), domainAndPolicy.getRight());
+                String domain = urls.get(0).getDomain();
+                RobotsPolicy robotsPolicy = getRobotsPolicy(domain);
+
+                LOGGER.info("Exploring domain: " + domain);
+                exploreNewBatch(urls, robotsPolicy);
             }
         } catch (RuntimeException e) {
             LOGGER.error("Exploring finished with error.. Retrying..", e);
@@ -91,21 +83,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
         return (long) (1000 * Math.random()) + config.resourceRequestDelay;
     }
 
-    private Pair<DomainDto, RobotsPolicy> getDomainToCrawl() {
-        try {
-            DomainDto domainDto = domainFeederClient.getCrawlableDomain();
-
-            LOGGER.info("Received domain to crawl: " + domainDto.getName());
-
-            RobotsPolicy robotsPolicy = getRobotsPolicy(domainDto);
-
-            return Pair.of(domainDto, robotsPolicy);
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Failed to retrieve domain for crawling", e);
-        }
-    }
-
-    private RobotsPolicy getRobotsPolicy(DomainDto domain) {
+    private RobotsPolicy getRobotsPolicy(String domain) {
         String robotsTxtLocation = getRobotsTxtLocation(domain);
         RobotsPolicy robotsPolicy = new RobotsPolicy(config.userAgent);
 
@@ -114,7 +92,7 @@ public class SingleDomainExplorerDaemon implements Runnable {
             Optional<RawWebResource> robotsTxtWebResource = httpResourceRetriever.retrieve(robotsTxtURL, config.userAgent);
 
             if (!robotsTxtWebResource.isPresent() || robotsTxtWebResource.get().getContent().isEmpty()) {
-                LOGGER.warn("Failed to get robots.txt for domain: " + domain.getName());
+                LOGGER.warn("Failed to get robots.txt for domain: " + domain);
             } else {
                 robotsPolicy = robotsTxtWebResource.map(x -> robotsTxtParser.parse(x, config.userAgent)).get();
             }
@@ -125,11 +103,15 @@ public class SingleDomainExplorerDaemon implements Runnable {
         return robotsPolicy;
     }
 
-    private String getRobotsTxtLocation(DomainDto domain) {
-        return domain.getName() + "/robots.txt";
+    private String getRobotsTxtLocation(String domain) {
+        return domain + "/robots.txt";
     }
 
-    private void exploreNewBatch(Collection<UniformResourceLocatorDto> urls, DomainDto domain, RobotsPolicy robotsPolicy) throws InterruptedException {
+    private List<UniformResourceLocatorDto> getUrlsToCrawl() {
+        return urlFrontierClient.getExplorableURLs();
+    }
+
+    private void exploreNewBatch(Collection<UniformResourceLocatorDto> urls, RobotsPolicy robotsPolicy) throws InterruptedException {
         for (UniformResourceLocatorDto url : urls) {
             Thread.sleep(getRandomDelay());
 
@@ -141,7 +123,6 @@ public class SingleDomainExplorerDaemon implements Runnable {
                 exploreUrl(url);
             }
 
-            updateCrawledDomain(domain);
             updateCrawledURL(url);
         }
     }
@@ -155,8 +136,6 @@ public class SingleDomainExplorerDaemon implements Runnable {
         } else {
             WebDocumentDto exploredWebDocument = htmlParser.parse(rawWebResource.get(), url);
 
-            putDiscoveredDomains(url.getDomainsReferred());
-            putDiscoveredURLs(url.getLinksReferred());
             storageDaemon.putExploredDocument(exploredWebDocument);
         }
     }
@@ -175,42 +154,6 @@ public class SingleDomainExplorerDaemon implements Runnable {
         }
 
         return true;
-    }
-
-    private void putDiscoveredDomains(Set<String> domains) {
-        Map<String, DomainDto> domainDtos = new HashMap<>();
-
-        for (String domain : domains) {
-            DomainDto domainDto = new DomainDto();
-
-            domainDto.setName(domain);
-            domainDto.setLastCrawled(ONE_HUNDRED_YEARS_AGO);
-            domainDtos.put(domain, domainDto);
-        }
-
-        storageDaemon.putDiscoveredDomains(domainDtos);
-    }
-
-    private void putDiscoveredURLs(Set<String> links) {
-        Map<String, UniformResourceLocatorDto> urls = new HashMap<>();
-
-        for (String link : links) {
-            try {
-                UniformResourceLocatorDto url = new UniformResourceLocatorDto(link);
-
-                url.setLastCrawled(ONE_HUNDRED_YEARS_AGO);
-                urls.put(url.getLocation(), url);
-            } catch (MalformedURLException e) {
-                LOGGER.error("Failed to construct URL from link: " + link, e);
-            }
-        }
-
-        storageDaemon.putDiscoveredURLs(urls);
-    }
-
-    private void updateCrawledDomain(DomainDto domain) {
-        domain.setLastCrawled(now());
-        storageDaemon.putExploredDomain(domain);
     }
 
     private void updateCrawledURL(UniformResourceLocatorDto url) {

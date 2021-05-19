@@ -1,4 +1,4 @@
-package com.aeloaiei.dissertation.domainexplorer.http;
+package com.aeloaiei.dissertation.domain.explorer.http;
 
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;

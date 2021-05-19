@@ -10,5 +10,5 @@ import java.util.Collection;
 @FeignClient(name = "DocumentHandlerClient", url = "${feign.client.document.handler.url}/documenthandler")
 public interface DocumentHandlerClient {
     @PutMapping
-    public void putAll(@RequestBody  Collection<WebDocumentDto> webDocuments);
+    public void putAll(@RequestBody Collection<WebDocumentDto> webDocuments);
 }

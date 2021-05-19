@@ -33,22 +33,8 @@ public class DomainFeederController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/explored")
-    public ResponseEntity<Collection<DomainDto>> putExploredDomains(@RequestBody Collection<DomainDto> domainDtos) {
-        List<Domain> domains = domainDtos
-                .stream()
-                .map(domainDto -> modelMapper.map(domainDto, Domain.class))
-                .collect(toList());
-        List<DomainDto> savedDomainDtos = domainFeederService.putAllExplored(domains)
-                .stream()
-                .map(domain -> modelMapper.map(domain, DomainDto.class))
-                .collect(toList());
-
-        return ResponseEntity.ok(savedDomainDtos);
-    }
-
     @PutMapping("/new")
-    public ResponseEntity<Collection<DomainDto>> putNewDomains(@RequestBody Collection<DomainDto> domainDtos) {
+    public ResponseEntity<Collection<DomainDto>> put(@RequestBody Collection<DomainDto> domainDtos) {
         List<Domain> domains = domainDtos
                 .stream()
                 .map(domainDto -> modelMapper.map(domainDto, Domain.class))

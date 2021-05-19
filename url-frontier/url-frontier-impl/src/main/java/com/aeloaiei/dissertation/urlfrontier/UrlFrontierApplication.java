@@ -8,7 +8,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.retry.annotation.EnableRetry;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -20,24 +21,22 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
+@EnableRetry
 @SpringBootApplication
+@EnableFeignClients(basePackages = {
+        "com.aeloaiei.dissertation.domainfeeder.api",
+})
 public class UrlFrontierApplication {
 
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private Configuration config;
-
     @Autowired
     private UrlFrontierService urlFrontierService;
 
     public static void main(String[] args) {
         SpringApplication.run(UrlFrontierApplication.class, args);
-    }
-
-    @Bean
-    public ModelMapper createModelMapper() {
-        return new ModelMapper();
     }
 
     @PostConstruct
@@ -49,7 +48,7 @@ public class UrlFrontierApplication {
                     .map(urlDto -> modelMapper.map(urlDto, UniformResourceLocator.class))
                     .collect(toList());
 
-            urlFrontierService.putAllNew(urls);
+            urlFrontierService.put(urls);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load the startup_urls.txt config file", e);
         }

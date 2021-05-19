@@ -15,11 +15,6 @@
     <dependencies>
         <dependency>
             <groupId>com.aeloaiei.dissertation</groupId>
-            <artifactId>domain-feeder-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.aeloaiei.dissertation</groupId>
             <artifactId>url-frontier-api</artifactId>
             <version>${project.version}</version>
         </dependency>

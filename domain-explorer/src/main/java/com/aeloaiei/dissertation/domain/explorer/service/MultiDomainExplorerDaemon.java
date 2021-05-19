@@ -1,10 +1,9 @@
-package com.aeloaiei.dissertation.domainexplorer.service;
+package com.aeloaiei.dissertation.domain.explorer.service;
 
-import com.aeloaiei.dissertation.domainexplorer.config.Configuration;
-import com.aeloaiei.dissertation.domainexplorer.http.HTMLParser;
-import com.aeloaiei.dissertation.domainexplorer.http.HTTPResourceRetriever;
-import com.aeloaiei.dissertation.domainexplorer.http.RobotsTxtParser;
-import com.aeloaiei.dissertation.domainfeeder.api.clients.DomainFeederClient;
+import com.aeloaiei.dissertation.domain.explorer.config.Configuration;
+import com.aeloaiei.dissertation.domain.explorer.http.HTMLParser;
+import com.aeloaiei.dissertation.domain.explorer.http.HTTPResourceRetriever;
+import com.aeloaiei.dissertation.domain.explorer.http.RobotsTxtParser;
 import com.aeloaiei.dissertation.urlfrontier.api.clients.UrlFrontierClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import java.util.concurrent.Executors;
 public class MultiDomainExplorerDaemon implements Runnable {
 
     private Configuration config;
-    private DomainFeederClient domainFeederClient;
     private UrlFrontierClient urlFrontierClient;
     private StorageDaemon storageDaemon;
     private HTTPResourceRetriever httpResourceRetriever;
@@ -26,14 +24,12 @@ public class MultiDomainExplorerDaemon implements Runnable {
 
     @Autowired
     public MultiDomainExplorerDaemon(Configuration config,
-                                     DomainFeederClient domainFeederClient,
                                      UrlFrontierClient urlFrontierClient,
                                      StorageDaemon storageDaemon,
                                      HTTPResourceRetriever httpResourceRetriever,
                                      HTMLParser htmlParser,
                                      RobotsTxtParser robotsTxtParser) {
         this.config = config;
-        this.domainFeederClient = domainFeederClient;
         this.urlFrontierClient = urlFrontierClient;
         this.storageDaemon = storageDaemon;
         this.httpResourceRetriever = httpResourceRetriever;
@@ -47,7 +43,6 @@ public class MultiDomainExplorerDaemon implements Runnable {
         for (int i = 0; i < config.concurrentDomainsExplorerCount; ++i) {
             executor.submit(new SingleDomainExplorerDaemon(
                     config,
-                    domainFeederClient,
                     urlFrontierClient,
                     storageDaemon,
                     httpResourceRetriever,

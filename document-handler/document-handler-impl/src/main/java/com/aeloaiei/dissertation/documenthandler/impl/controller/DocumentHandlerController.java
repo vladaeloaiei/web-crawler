@@ -1,7 +1,7 @@
 package com.aeloaiei.dissertation.documenthandler.impl.controller;
 
 import com.aeloaiei.dissertation.documenthandler.api.dto.WebDocumentDto;
-import com.aeloaiei.dissertation.documenthandler.impl.model.nosql.WebDocument;
+import com.aeloaiei.dissertation.documenthandler.impl.model.WebDocument;
 import com.aeloaiei.dissertation.documenthandler.impl.service.DocumentHandlerService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

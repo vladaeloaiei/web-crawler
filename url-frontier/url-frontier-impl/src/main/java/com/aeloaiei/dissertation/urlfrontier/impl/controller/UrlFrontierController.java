@@ -26,33 +26,23 @@ public class UrlFrontierController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @PutMapping("/explored")
-    public ResponseEntity<?> putAllExplored(@RequestBody Collection<UniformResourceLocatorDto> urlDtos) {
-        List<UniformResourceLocator> urls = urlDtos.stream()
-                .map(urlDto -> modelMapper.map(urlDto, UniformResourceLocator.class))
-                .collect(toList());
-
-        urlFrontierService.putAllExplored(urls);
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("/new")
-    public ResponseEntity<?> putAllNew(@RequestBody Collection<UniformResourceLocatorDto> urlDtos) {
-        List<UniformResourceLocator> urls = urlDtos.stream()
-                .map(urlDto -> modelMapper.map(urlDto, UniformResourceLocator.class))
-                .collect(toList());
-
-        urlFrontierService.putAllNew(urls);
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping
-    public ResponseEntity<Collection<UniformResourceLocatorDto>> getExplorableURLs(@RequestParam String domain) {
-        List<UniformResourceLocatorDto> urlDtos = urlFrontierService.getExplorableURLs(domain)
+    public ResponseEntity<Collection<UniformResourceLocatorDto>> getExplorableURLs() {
+        List<UniformResourceLocatorDto> urlDtos = urlFrontierService.getExplorableURLs()
                 .stream()
                 .map(url -> modelMapper.map(url, UniformResourceLocatorDto.class))
                 .collect(toList());
 
         return ResponseEntity.ok(urlDtos);
+    }
+
+    @PutMapping("/explored")
+    public ResponseEntity<?> put(@RequestBody Collection<UniformResourceLocatorDto> urlDtos) {
+        List<UniformResourceLocator> urls = urlDtos.stream()
+                .map(urlDto -> modelMapper.map(urlDto, UniformResourceLocator.class))
+                .collect(toList());
+
+        urlFrontierService.put(urls);
+        return ResponseEntity.ok().build();
     }
 }
