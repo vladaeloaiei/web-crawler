@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class RawWebResource {
     private String location;
     private String content;
+    private boolean isText;
 }

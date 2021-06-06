@@ -24,8 +24,7 @@ public class DNSResolver implements Dns {
     @Override
     public List<InetAddress> lookup(@NonNull String host) throws UnknownHostException {
         try {
-            return resolver.resolveAll(host)
-                    .get();
+            return resolver.resolveAll(host).get();
         } catch (Exception e) {
             LOGGER.error("Failed to resolve host: " + host, e);
             throw new UnknownHostException(e.getMessage());

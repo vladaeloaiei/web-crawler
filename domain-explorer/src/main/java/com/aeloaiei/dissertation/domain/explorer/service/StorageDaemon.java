@@ -48,32 +48,38 @@ public class StorageDaemon implements Runnable {
     }
 
     private void publish() throws InterruptedException {
-        try {
-            Thread.sleep(config.metadataUpdateWindow);
-            publishURLs();
-            publishDocuments();
-        } catch (RuntimeException e) {
-            LOGGER.error("Failed to publish. Error: ", e);
-        }
+        Thread.sleep(config.metadataUpdateWindow);
+        publishURLs();
+        publishDocuments();
     }
 
     private void publishURLs() {
         Map<String, UniformResourceLocatorDto> tempExploredURLs = exploredURLs;
 
-        if (!exploredURLs.isEmpty()) {
-            exploredURLs = new ConcurrentHashMap<>();
-            LOGGER.info("Publishing " + tempExploredURLs.values().size() + " explored URLs");
-            urlFrontierClient.put(tempExploredURLs.values());
+        try {
+            if (!exploredURLs.isEmpty()) {
+                exploredURLs = new ConcurrentHashMap<>();
+                LOGGER.info("Publishing " + tempExploredURLs.values().size() + " explored URLs");
+                urlFrontierClient.put(tempExploredURLs.values());
+            }
+        } catch (RuntimeException e) {
+            LOGGER.error("Failed to publish URLs. Error: ", e);
+            exploredURLs.putAll(tempExploredURLs);
         }
     }
 
     private void publishDocuments() {
         Set<WebDocumentDto> tempExploredDocuments = exploredDocuments;
 
-        if (!exploredDocuments.isEmpty()) {
-            exploredDocuments = ConcurrentHashMap.newKeySet();
-            LOGGER.debug("Publishing discovered documents.");
-            documentHandlerClient.putAll(tempExploredDocuments);
+        try {
+            if (!exploredDocuments.isEmpty()) {
+                exploredDocuments = ConcurrentHashMap.newKeySet();
+                LOGGER.debug("Publishing discovered documents.");
+                documentHandlerClient.putAll(tempExploredDocuments);
+            }
+        } catch (RuntimeException e) {
+            LOGGER.error("Failed to publish. Error: ", e);
+            exploredDocuments.addAll(tempExploredDocuments);
         }
     }
 }

@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import static com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus.FAILED;
 import static com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus.NOT_ALLOWED_ROBOTS_TXT;
+import static com.aeloaiei.dissertation.urlfrontier.api.dto.CrawlingStatus.NOT_TEXT_RESOURCE;
 import static java.time.LocalDateTime.now;
 
 @Service
@@ -133,6 +134,9 @@ public class SingleDomainExplorerDaemon implements Runnable {
         if (!rawWebResource.isPresent()) {
             LOGGER.error("Failed to explore: " + url);
             url.setCrawlingStatus(FAILED);
+        } else if (!rawWebResource.get().isText()) {
+            LOGGER.warn("The resource is not text type: " + url);
+            url.setCrawlingStatus(NOT_TEXT_RESOURCE);
         } else {
             WebDocumentDto exploredWebDocument = htmlParser.parse(rawWebResource.get(), url);
 

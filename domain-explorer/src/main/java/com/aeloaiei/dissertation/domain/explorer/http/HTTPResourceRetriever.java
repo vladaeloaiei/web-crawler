@@ -22,6 +22,8 @@ public class HTTPResourceRetriever {
 
     @Autowired
     private OkHttpClient httpClient;
+    @Autowired
+    private HTTPResourceFilter httpResourceFilter;
 
     public Optional<RawWebResource> retrieve(UniformResourceLocatorDto url, String userAgent) {
         Optional<RawWebResource> rawWebResource = Optional.empty();
@@ -33,13 +35,18 @@ public class HTTPResourceRetriever {
         try (Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 LOGGER.debug("Unable to retrieve resource: " + url.getLocation() + " http code: " + response.code());
-                rawWebResource = Optional.of(new RawWebResource(url.getLocation(), ""));
+                rawWebResource = Optional.of(new RawWebResource(url.getLocation(), "", false));
             } else if (isNull(response.body())) {
                 LOGGER.debug("Resource: " + url.getLocation() + " has empty body");
-                rawWebResource = Optional.of(new RawWebResource(url.getLocation(), ""));
+                rawWebResource = Optional.of(new RawWebResource(url.getLocation(), "", false));
             } else {
                 LOGGER.debug("Resource: " + url.getLocation() + " successfully retrieved");
-                rawWebResource = Optional.of(new RawWebResource(url.getLocation(), response.body().string()));
+
+                if (httpResourceFilter.filter(response)) {
+                    rawWebResource = Optional.of(new RawWebResource(url.getLocation(), response.body().string(), false));
+                } else {
+                    rawWebResource = Optional.of(new RawWebResource(url.getLocation(), response.body().string(), true));
+                }
             }
 
             url.setHttpStatus(HttpStatus.resolve(response.code()));

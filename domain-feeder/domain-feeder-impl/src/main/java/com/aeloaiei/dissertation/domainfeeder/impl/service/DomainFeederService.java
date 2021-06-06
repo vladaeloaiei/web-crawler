@@ -47,6 +47,7 @@ public class DomainFeederService {
             });
 
             if (domain.filter(d -> domainFilterService.isAllowed(d.getName())).isPresent()) {
+                LOGGER.info("Sending to explore domain: " + domain);
                 return domain;
             }
         }
@@ -68,6 +69,7 @@ public class DomainFeederService {
                 .filter(domain -> !domainRepository.existsByName(domain.getName()))
                 .collect(toList());
 
+        LOGGER.info("Saving new domains: " + domainsToSave);
         domainRepository.saveAll(domainsToSave);
         return allowedDomains;
     }
